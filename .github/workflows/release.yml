@@ -1,0 +1,85 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build exe
+        run: pyinstaller --onefile --windowed --name "DownloadHelper" --version-file version_info.txt --noupx main.py
+
+      - name: Download N_m3u8DL-RE
+        shell: pwsh
+        run: |
+          $release = Invoke-RestMethod -Uri "https://api.github.com/repos/nilaoda/N_m3u8DL-RE/releases/latest"
+          $asset = $release.assets | Where-Object { $_.name -match "win-x64" -and $_.name -match "\.zip$" } | Select-Object -First 1
+          Invoke-WebRequest -Uri $asset.browser_download_url -OutFile "n_m3u8dl-re.zip"
+          Expand-Archive -Path "n_m3u8dl-re.zip" -DestinationPath "n_m3u8dl-re_extracted"
+          $exe = Get-ChildItem -Path "n_m3u8dl-re_extracted" -Recurse -Filter "N_m3u8DL-RE.exe" | Select-Object -First 1
+          Copy-Item $exe.FullName -Destination "dist/N_m3u8DL-RE.exe"
+
+      - name: Download ffmpeg
+        shell: pwsh
+        run: |
+          $release = Invoke-RestMethod -Uri "https://api.github.com/repos/BtbN/FFmpeg-Builds/releases/latest"
+          $asset = $release.assets | Where-Object { $_.name -match "win64-gpl\.zip$" -and $_.name -notmatch "shared" } | Select-Object -First 1
+          Invoke-WebRequest -Uri $asset.browser_download_url -OutFile "ffmpeg.zip"
+          Expand-Archive -Path "ffmpeg.zip" -DestinationPath "ffmpeg_extracted"
+          $exe = Get-ChildItem -Path "ffmpeg_extracted" -Recurse -Filter "ffmpeg.exe" | Select-Object -First 1
+          Copy-Item $exe.FullName -Destination "dist/ffmpeg.exe"
+
+      - name: Download mp4decrypt (Bento4)
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://www.bok.net/Bento4/binaries/Bento4-SDK-1-6-0-641.x86_64-microsoft-win32.zip" -OutFile "bento4.zip"
+          Expand-Archive -Path "bento4.zip" -DestinationPath "bento4_extracted"
+          $exe = Get-ChildItem -Path "bento4_extracted" -Recurse -Filter "mp4decrypt.exe" | Select-Object -First 1
+          Copy-Item $exe.FullName -Destination "dist/mp4decrypt.exe"
+
+      - name: List dist contents
+        run: dir dist
+
+      - name: Create zip archive
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "dist/*" -DestinationPath "DownloadHelper-win-x64.zip"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            DownloadHelper-win-x64.zip
+            dist/DownloadHelper.exe
+          generate_release_notes: true
+          body: |
+            ## Yuklab olish yordamchisi ${{ github.ref_name }} - O'zbekcha
+
+            ### O'zgarishlar
+            - To'liq o'zbekcha interfeys
+            - GitHub link ElyorErgashov2010 ga o'zgartirildi
+
+            ### Yuklab olish
+            - **DownloadHelper-win-x64.zip** - barcha kerakli utilitalar bilan (tavsiya etiladi)
+            - **DownloadHelper.exe** - faqat exe (ffmpeg, N_m3u8DL-RE, mp4decrypt alohida kerak)
+
+            Asl loyiha: https://github.com/makdinoven/DownloadHelper
