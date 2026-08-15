@@ -7,7 +7,7 @@ CONFIG_DIR = Path.home() / ".downloader_helper"
 CONFIG_PATH = CONFIG_DIR / "config.json"
 
 _DEFAULTS = {
-    "save_path": "",            # Bo'sh - foydalanuvchi tanlashi kerak (ilgari ~/Downloads edi)
+    "save_path": str(Path.home() / "Downloads"),
     "s3_profiles": [],          # list[dict] — S3 profillari
     "s3_active_profile": "",    # faol profil nomi
     "s3_default_path": "/",
