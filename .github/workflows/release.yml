@@ -1,19 +1,27 @@
-name: Build & Release
+name: Build & Update v1.4.0
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - main
+  workflow_dispatch:
 
 permissions:
   contents: write
+
+concurrency:
+  group: release-v1.4.0
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -64,15 +72,29 @@ jobs:
         run: |
           Compress-Archive -Path "dist/*" -DestinationPath "DownloadHelper-win-x64.zip"
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+      - name: Move v1.4.0 tag to current main commit
+        shell: pwsh
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag --force v1.4.0 $env:GITHUB_SHA
+          git push origin refs/tags/v1.4.0 --force
+
+      - name: Update existing v1.4.0 release
+        uses: softprops/action-gh-release@v3
         with:
+          tag_name: v1.4.0
+          name: DownloadHelper v1.4.0
+          overwrite_files: true
+          fail_on_unmatched_files: true
+          make_latest: true
           files: |
             DownloadHelper-win-x64.zip
             dist/DownloadHelper.exe
-          generate_release_notes: true
           body: |
-            ## Yuklab olish yordamchisi ${{ github.ref_name }} - O'zbekcha
+            ## Yuklab olish yordamchisi v1.4.0 - O'zbekcha
+
+            Ushbu release `main` branchdagi eng so'nggi kod asosida avtomatik yangilanadi.
 
             ### O'zgarishlar
             - To'liq o'zbekcha interfeys
