@@ -1,6 +1,6 @@
 """Fayl nomi muharriri va «Normallashtirish» tugmasi."""
 
-from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel, QLineEdit, QPushButton
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QLabel, QLineEdit, QPushButton
 
 
 class FileNameEdit(QWidget):

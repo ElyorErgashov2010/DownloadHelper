@@ -1,10 +1,10 @@
 """Vazifalar tarixi jadvali."""
 
-from PyQt6.QtWidgets import (
+from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem,
     QPushButton, QHeaderView, QAbstractItemView,
 )
-from PyQt6.QtCore import pyqtSignal
+from PySide6.QtCore import Signal
 
 from app.core.task_manager import Task
 
@@ -18,9 +18,9 @@ _STATUS_UZ = {
 
 
 class TaskList(QWidget):
-    view_logs_requested = pyqtSignal(int)
-    redownload_requested = pyqtSignal(int)
-    delete_requested = pyqtSignal(int)
+    view_logs_requested = Signal(int)
+    redownload_requested = Signal(int)
+    delete_requested = Signal(int)
 
     def __init__(self, parent=None):
         super().__init__(parent)

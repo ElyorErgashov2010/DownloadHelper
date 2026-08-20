@@ -1,8 +1,8 @@
 """QSystemTrayIcon orqali tizim bildirishnomalari."""
 
-from PyQt6.QtWidgets import QSystemTrayIcon, QApplication
-from PyQt6.QtGui import QIcon
-from PyQt6.QtCore import QTimer
+from PySide6.QtWidgets import QSystemTrayIcon, QApplication
+from PySide6.QtGui import QIcon
+from PySide6.QtCore import QTimer
 
 
 class Notifier:

@@ -1,7 +1,7 @@
 VSVersionInfo(
   ffi=FixedFileInfo(
-    filevers=(1, 4, 0, 0),
-    prodvers=(1, 4, 0, 0),
+    filevers=(1, 4, 1, 0),
+    prodvers=(1, 4, 1, 0),
     mask=0x3f,
     flags=0x0,
     OS=0x40004,
@@ -17,12 +17,12 @@ VSVersionInfo(
           [
             StringStruct(u'CompanyName', u'ElyorErgashov2010'),
             StringStruct(u'FileDescription', u'Yuklab olish yordamchisi - N_m3u8DL-RE uchun GUI'),
-            StringStruct(u'FileVersion', u'1.4.0.0'),
+            StringStruct(u'FileVersion', u'1.4.1'),
             StringStruct(u'InternalName', u'DownloadHelper'),
             StringStruct(u'OriginalFilename', u'DownloadHelper.exe'),
             StringStruct(u'ProductName', u'Download Helper'),
-            StringStruct(u'ProductVersion', u'1.4.0.0'),
-            StringStruct(u'LegalCopyright', u'Fork of makdinoven/DownloadHelper'),
+            StringStruct(u'ProductVersion', u'1.4.1'),
+            StringStruct(u'LegalCopyright', u'Copyright © 2026 ElyorErgashov2010'),
           ]
         )
       ]

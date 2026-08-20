@@ -2,7 +2,7 @@
 
 import re
 
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QProgressBar, QLabel
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QProgressBar, QLabel
 
 
 # N_m3u8DL-RE oqim prefikslari (video > audio > subtitr bo'yicha muhim)

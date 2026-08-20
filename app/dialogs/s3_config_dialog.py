@@ -1,17 +1,17 @@
 """S3 profillarini boshqarish dialogi."""
 
-from PyQt6.QtWidgets import (
+from PySide6.QtWidgets import (
     QDialog, QFormLayout, QLineEdit, QPushButton, QHBoxLayout, QVBoxLayout,
     QLabel, QListWidget, QMessageBox, QInputDialog, QSplitter, QWidget,
 )
-from PyQt6.QtCore import QThread, pyqtSignal, Qt
+from PySide6.QtCore import QThread, Signal, Qt
 
 from app.core.config import ConfigManager
 
 
 class _S3TestWorker(QThread):
     """S3 ga ulanishni fon rejimida tekshirish."""
-    result = pyqtSignal(bool, str)
+    result = Signal(bool, str)
 
     def __init__(self, config: dict, parent=None):
         super().__init__(parent)

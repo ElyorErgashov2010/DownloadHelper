@@ -1,7 +1,7 @@
-"""File name normalization using Unidecode."""
+"""File name normalization using text-unidecode."""
 
 import re
-from unidecode import unidecode
+from text_unidecode import unidecode
 
 
 def normalize_filename(name: str) -> str:

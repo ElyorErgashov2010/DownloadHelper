@@ -1,7 +1,7 @@
 """Yordam / foydalanuvchi qo'llanmasi dialogi."""
 
-from PyQt6.QtWidgets import QDialog, QVBoxLayout, QTextBrowser, QPushButton
-from PyQt6.QtCore import QSize
+from PySide6.QtWidgets import QDialog, QVBoxLayout, QTextBrowser, QPushButton
+from PySide6.QtCore import QSize
 
 HELP_HTML = """\
 <h2>Yuklab olish yordamchisi — Foydalanuvchi qo'llanmasi</h2>
@@ -53,10 +53,12 @@ System Log (JSON) faylini Telegramdagi
 botiga yuboring. Bot N_m3u8DL-RE uchun tayyor buyruqni qaytaradi.
 Uni to'liqligicha nusxalang.</p>
 
-<p><b>2. Buyruqni qo'yish va tahlil qilish</b><br>
-Nusxalangan buyruqni <i>«Buyruq»</i> maydoniga qo'ying va
-<b>«Buyruqni tahlil qilish»</b> tugmasini bosing. Dastur URL, fayl nomi
-va boshqa parametrlarni avtomatik ajratib oladi.</p>
+<p><b>2. Buyruqni joylash va tahlil qilish</b><br>
+Buyruqni istalgan joydan nusxalang. So'ng <b>«Joylash»</b> tugmasini
+bosing — buferdagi matn <i>«Buyruq»</i> maydoniga Ctrl+V kabi joylanadi va
+dastur URL, fayl nomi hamda boshqa parametrlarni avtomatik tahlil qiladi.
+Istasangiz, maydonga bevosita <b>Ctrl+V</b> bilan ham joylashingiz mumkin.
+<b>«Buyruqni tahlil qilish»</b> tugmasi mavjud matnni qayta tahlil qiladi.</p>
 
 <p><b>3. Fayl nomi</b><br>
 Tahlildan so'ng fayl nomi <i>«Fayl nomi»</i> maydonida paydo bo'ladi.
@@ -94,8 +96,9 @@ imkonini beradi. So'ng <b>«Yuklab olish»</b> tugmasini bosing — vazifalar
 ketma-ket, biri ketidan biri bajariladi.<br>
 Agar navbat bo'sh bo'lsa, <b>«Yuklab olish»</b> joriy vazifani darhol
 boshlaydi.<br>
-Ochiladigan <b>«▶ Navbat (N)»</b> bo'limi navbat mazmunini ko'rsatadi.
-Elementlarni tanlab o'chirish yoki butun navbatni tozalash mumkin.</p>
+Ramkali <b>«▶ Navbat (N) — Ko'rsatish»</b> tugmasi navbat mazmunini
+ko'rsatadi yoki yashiradi. Elementlarni tanlab o'chirish yoki butun navbatni
+tozalash mumkin.</p>
 
 <p><b>7. Yuklashni boshqarish</b></p>
 <ul>
@@ -118,15 +121,16 @@ Joy yetarli bo'lmasa, vazifa o'tkazib yuboriladi.</p>
 
 <h3>Avto-rejim</h3>
 
-<p>Oynaning yuqori qismidagi <b>«Avto-rejim»</b> belgilash qutisi
-buferni kuzatishni yoqadi:</p>
+<p>Oynaning yuqori qismidagi <b>«Avto-rejim»</b> yoqilganda dastur
+buyruq <b>«Joylash»</b> tugmasi orqali qo'yilgach avtomatik ishlaydi:</p>
 <ol>
   <li>Saqlash joyini sozlang (Lokal yoki S3, yo'l, profil)</li>
   <li><b>«Avto-rejim»</b> ni yoqing</li>
   <li>N_m3u8DL-RE buyrug'ini istalgan joydan nusxalang (Ctrl+C)</li>
+  <li><b>«Joylash»</b> tugmasini bosing</li>
   <li>Dastur avtomatik ravishda:
     <ul>
-      <li>buyruqni qo'yadi va tahlil qiladi</li>
+      <li>buyruqni tahlil qiladi</li>
       <li>fayl nomini normallashtiradi (<b>«Nomni avto-normallashtirish»</b>
           yoqilgan bo'lsa)</li>
       <li>yuklashni boshlaydi yoki navbatga qo'shadi (yuklash allaqachon
@@ -134,10 +138,10 @@ buferni kuzatishni yoqadi:</p>
     </ul>
   </li>
 </ol>
-<p>Ishga tushganda tizim bildirishnomasi (toast) ko'rsatiladi — shunda
-dastur bilan yig'ilgan holatda ham ishlash mumkin.</p>
-<p>Faqat «N_m3u8DL-RE» so'zi bor matnga <b>javob beradi</b> — oddiy
-nusxalash ishga tushirmaydi.</p>
+<p><b>«Joylash»</b> almashinuv buferidagi matnni Ctrl+V kabi maydonga qo'yadi.
+Dastur buferdagi har bir nusxalashni o'zi doimiy kuzatmaydi.</p>
+<p>Avto-rejim faqat «N_m3u8DL-RE» so'zi bor buyruqni qabul qiladi — boshqa
+matn yuklashni boshlatmaydi.</p>
 
 <hr>
 

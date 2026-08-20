@@ -1,13 +1,19 @@
 # Yuklab olish yordamchisi (Download Helper)
 
 [![Release](https://img.shields.io/github/v/release/ElyorErgashov2010/DownloadHelper?label=Release)](https://github.com/ElyorErgashov2010/DownloadHelper/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**Asl loyiha:** [makdinoven/DownloadHelper](https://github.com/makdinoven/DownloadHelper) — rus tilidagi original versiya.  
-**Ushbu fork:** To'liq o'zbek tiliga o'girilgan variant.
+**Loyiha muallifi va maintainori:** [ElyorErgashov2010](https://github.com/ElyorErgashov2010)
 
-[N_m3u8DL-RE](https://github.com/nilaoda/N_m3u8DL-RE) yordamida oqimli videolarni yuklab olish uchun GUI dastur.
+**E'tirof:** loyiha g'oyasi va foydalanuvchi tajribasi uchun [makdinoven/DownloadHelper](https://github.com/makdinoven/DownloadHelper) eslatib o'tiladi.
+
+**Litsenziya:** [MIT](LICENSE)
+
+[N_m3u8DL-RE](https://github.com/nilaoda/N_m3u8DL-RE) yordamida oqimli videolar bilan ishlash uchun GUI dastur.
 
 Foydalanuvchi Telegram-botdan ishga tushirish buyrug'ini nusxalaydi, dasturga qo'yadi, fayl nomi va saqlash joyini sozlab, yuklashni boshlaydi. Lokal diskka ham, S3-mos saqlashga ham saqlash qo'llab-quvvatlanadi.
+
+> Faqat foydalanishga, yuklab olishga va qayta ishlashga huquqingiz bo'lgan media hamda xizmatlardan foydalaning.
 
 ---
 
@@ -23,6 +29,19 @@ Arxiv ichida:
 - `mp4decrypt.exe`
 
 Hammasi bir papkada bo'lishi kerak.
+
+### Windows imzosi va xavfsizlik
+
+`v1.4.1`dan boshlab release workflow `DownloadHelper.exe`ni SignPath Foundation
+orqali imzolash uchun tayyorlangan. Imzo faqat GitHub Release sahifasida
+**Digital Signatures** bo'limida `Valid` holatda ko'rinsa haqiqiy hisoblanadi.
+
+- Oddiy foydalanuvchilar sertifikat o'rnatmaydi va CMD yozmaydi.
+- `N_m3u8DL-RE.exe`, `ffmpeg.exe` va `mp4decrypt.exe` alohida upstream
+  vositalardir; ular ushbu loyiha sertifikati bilan imzolanmaydi va Windows
+  tomonidan alohida baholanishi mumkin.
+- To'liq tartib: [CODE_SIGNING_POLICY.md](CODE_SIGNING_POLICY.md).
+- Litsenziya/manba eslatmalari: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ---
 
@@ -41,9 +60,9 @@ Uchala utilita ham **dastur bilan bir papkada** (exe yonida) yoki **tizim PATH**
 ### Python bog'liqliklar
 
 ```
-PyQt6 >= 6.5
+PySide6-Essentials >= 6.5
 boto3 >= 1.28
-Unidecode >= 1.3
+text-unidecode >= 1.3
 ```
 
 O'rnatish:
@@ -100,10 +119,11 @@ botiga yuboring. Bot N_m3u8DL-RE uchun tayyor buyruqni qaytaradi.
 
 ### «Yangi vazifa» varag'i
 
-#### Buyruqni tahlil qilish
-- Buyruqni matn maydoniga qo'ying
-- **«Buyruqni tahlil qilish»** tugmasini bosing — dastur URL, fayl nomi va parametrlarni ajratib oladi
-- Ctrl+V orqali qo'yilganda buyruq avtomatik tahlil qilinadi
+#### Buyruqni joylash va tahlil qilish
+- N_m3u8DL-RE buyrug'ini istalgan joydan nusxalang
+- **«Joylash»** tugmasini bosing — buferdagi matn Buyruq maydoniga Ctrl+V kabi joylanadi
+- Joylangan buyruq avtomatik tahlil qilinadi; **«Buyruqni tahlil qilish»** tugmasi bilan uni qayta tahlil qilish mumkin
+- Istasangiz, Buyruq maydonida Ctrl+V ham ishlaydi
 
 #### Fayl nomi
 - Maydon buyruq tahlilidan so'ng avtomatik to'ldiriladi
@@ -136,8 +156,8 @@ botiga yuboring. Bot N_m3u8DL-RE uchun tayyor buyruqni qaytaradi.
   joriy vazifani boshlaydi
 - **«Bekor qilish»** — joriy yuklashni to'xtatadi, navbatni tozalaydi va chala
   yuklab olingan fayllarni o'chiradi
-- Ochiladigan **«▶ Navbat (N)»** bo'limi navbat mazmunini ko'rsatadi; alohida
-  elementlarni o'chirish yoki butun navbatni tozalash mumkin
+- Ramkali **«▶ Navbat (N) — Ko'rsatish»** tugmasi navbat mazmunini ochadi yoki
+  yashiradi; alohida elementlarni o'chirish yoki butun navbatni tozalash mumkin
 
 #### Xato bo'lsa qayta urinishlar
 - **«Xato bo'lsa qayta urinishlar»** maydoni (0–10, odatda 2) — yuklash xato
@@ -159,22 +179,23 @@ botiga yuboring. Bot N_m3u8DL-RE uchun tayyor buyruqni qaytaradi.
 
 ### Avto-rejim
 
-Oynaning yuqori qismidagi **«Avto-rejim»** belgilash qutisi almashinuv buferini
-kuzatishni yoqadi:
+Oynaning yuqori qismidagi **«Avto-rejim»** yoqilganda dastur buyruq
+**«Joylash»** tugmasi orqali qo'yilgach avtomatik ishlaydi:
 
 1. Saqlash joyini sozlang (Lokal yoki S3, yo'l, profil)
 2. **«Avto-rejim»** ni yoqing
 3. N_m3u8DL-RE buyrug'ini istalgan joydan nusxalang (Ctrl+C)
-4. Dastur avtomatik ravishda:
-   - buyruqni qo'yadi va tahlil qiladi
+4. **«Joylash»** tugmasini bosing
+5. Dastur avtomatik ravishda:
+   - buyruqni tahlil qiladi
    - fayl nomini normallashtiradi (**«Nomni avto-normallashtirish»** yoqilgan bo'lsa)
    - yuklashni boshlaydi yoki navbatga qo'shadi (yuklash allaqachon ketayotgan bo'lsa)
 
-Ishga tushganda tizim bildirishnomasi (toast) ko'rsatiladi — shunda dastur bilan
-yig'ilgan holatda ham ishlash mumkin.
+**«Joylash»** almashinuv buferidagi matnni Ctrl+V kabi Buyruq maydoniga qo'yadi.
+Dastur buferdagi har bir nusxalashni o'zi doimiy kuzatmaydi.
 
-Faqat «N_m3u8DL-RE» so'zi bor matnga **javob beradi** — oddiy nusxalash ishga
-tushirmaydi.
+Avto-rejim faqat «N_m3u8DL-RE» so'zi bor buyruqni qabul qiladi — boshqa matn
+yuklashni boshlatmaydi.
 
 ---
 
@@ -254,5 +275,8 @@ Downloader/
 
 ---
 
-Asl muallif: [makdinoven](https://github.com/makdinoven/DownloadHelper) 
-O'zbekcha fork: [ElyorErgashov2010](https://github.com/ElyorErgashov2010/DownloadHelper)
+## Mualliflik va litsenziya
+
+- Muallif va maintainer: [ElyorErgashov2010](https://github.com/ElyorErgashov2010)
+- Loyiha kodi: [MIT License](LICENSE)
+- Release ZIP ichidagi mustaqil vositalar: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)

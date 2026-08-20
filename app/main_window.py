@@ -5,12 +5,12 @@ import shutil
 import tempfile
 from dataclasses import dataclass
 
-from PyQt6.QtWidgets import (
+from PySide6.QtWidgets import (
     QMainWindow, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QMessageBox, QSpinBox, QFileDialog, QListWidget,
     QListWidgetItem, QCheckBox, QApplication,
 )
-from PyQt6.QtCore import QSize, Qt, QTimer
+from PySide6.QtCore import QSize, Qt, QTimer
 
 from app.core.command_parser import parse_command, ParsedCommand
 from app.core.normalizer import normalize_filename
@@ -112,9 +112,7 @@ class MainWindow(QMainWindow):
         top_row.addWidget(help_btn)
         central_layout.addLayout(top_row)
 
-        # Almashinuv buferini kuzatish
-        self._clipboard = QApplication.clipboard()
-        self._ignore_clipboard = False
+        # Almashinuv buferi faqat «Joylash» tugmasi bosilganda ishlatiladi.
 
         self._tabs = QTabWidget()
         central_layout.addWidget(self._tabs, 1)
@@ -148,6 +146,7 @@ class MainWindow(QMainWindow):
 
         self._cmd_input = CommandInput()
         self._cmd_input.parse_btn.clicked.connect(self._on_parse)
+        self._cmd_input.paste_btn.clicked.connect(self._on_paste_command)
         self._cmd_input.auto_parse_requested.connect(self._on_parse)
         layout.addWidget(self._cmd_input)
 
@@ -182,11 +181,21 @@ class MainWindow(QMainWindow):
         ctrl_row.addStretch()
         layout.addLayout(ctrl_row)
 
-        # Ochiladigan navbat
+        # Ochiladigan navbat — ramkali tugma, tugma ekanligi aniq ko'rinadi.
         queue_header = QHBoxLayout()
-        self._queue_toggle = QPushButton("▶ Navbat (0)")
+        self._queue_toggle = QPushButton("▶ Navbat (0) — Ko'rsatish")
+        self._queue_toggle.setMinimumHeight(32)
+        self._queue_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
+        self._queue_toggle.setToolTip("Navbatni ko'rsatish yoki yashirish")
         self._queue_toggle.setStyleSheet(
-            "QPushButton { border: none; color: gray; font-size: 12px; text-align: left; }"
+            "QPushButton {"
+            " border: 1px solid #747474; border-radius: 5px;"
+            " padding: 5px 10px; color: #e8e8e8; background: #383838;"
+            " font-size: 12px; font-weight: 600; text-align: left;"
+            "}"
+            "QPushButton:hover { background: #484848; border-color: #a0a0a0; }"
+            "QPushButton:pressed { background: #2f2f2f; }"
+            "QPushButton:checked { background: #28547c; border-color: #66a9df; }"
         )
         self._queue_toggle.setCheckable(True)
         self._queue_toggle.clicked.connect(self._on_toggle_queue)
@@ -323,6 +332,13 @@ class MainWindow(QMainWindow):
         if self._parsed.save_name:
             self._log_panel.append_text(f"Nomi: {self._parsed.save_name}\n")
 
+    def _on_paste_command(self):
+        """«Joylash» tugmasi: Ctrl+V kabi buferdagi matnni maydonga qo'yadi."""
+        pasted = self._cmd_input.paste_from_clipboard()
+        if pasted and self._auto_cb.isChecked():
+            # QTextEdit paste signalidan keyin tahlil tugashi uchun event loop'ga qaytaramiz.
+            QTimer.singleShot(0, self._run_auto_mode_for_current_command)
+
     def _on_normalize(self):
         name = self._file_name.get_name()
         if name:
@@ -337,21 +353,17 @@ class MainWindow(QMainWindow):
         dlg = HelpDialog(self)
         dlg.exec()
 
-    # ── Avto-rejim (almashinuv buferini kuzatish) ────────────────
+    # ── Avto-rejim («Joylash» orqali) ───────────────────────────
 
     def _on_auto_toggle(self, checked: bool):
         self._auto_normalize_cb.setEnabled(checked)
         if checked:
-            self._clipboard.dataChanged.connect(self._on_clipboard_changed)
             dest = "S3" if not self._dest_panel.is_local() else "Lokal"
             self._log_panel.append_text(
-                f"Avto-rejim yoqildi. Manzil: {dest}. Buyruq kutilmoqda...\n"
+                "Avto-rejim yoqildi. Buyruqni nusxalang va «Joylash» tugmasini bosing. "
+                f"Manzil: {dest}.\n"
             )
         else:
-            try:
-                self._clipboard.dataChanged.disconnect(self._on_clipboard_changed)
-            except TypeError:
-                pass
             self._log_panel.append_text("Avto-rejim o'chirildi.\n")
 
     def _on_auto_help(self):
@@ -360,10 +372,13 @@ class MainWindow(QMainWindow):
             "1. «Avto-rejim» belgilash qutisini yoqing<br>"
             "2. Saqlash joyini sozlang (Lokal yoki S3, yo'l, profil)<br>"
             "3. N_m3u8DL-RE buyrug'ini istalgan joydan nusxalang (Ctrl+C)<br>"
-            "4. Dastur avtomatik ravishda:<br>"
-            "&nbsp;&nbsp;— buyruqni qo'yadi va tahlil qiladi<br>"
+            "4. «Joylash» tugmasini bosing<br>"
+            "5. Dastur avtomatik ravishda:<br>"
+            "&nbsp;&nbsp;— buyruqni tahlil qiladi<br>"
             "&nbsp;&nbsp;— fayl nomini normallashtiradi (yoqilgan bo'lsa)<br>"
             "&nbsp;&nbsp;— yuklashni boshlaydi yoki navbatga qo'shadi<br><br>"
+            "<b>Joylash:</b> almashinuv buferidagi matnni buyruq maydoniga "
+            "Ctrl+V kabi qo'yadi. Dastur buferni o'zi doimiy kuzatmaydi.<br><br>"
             "<b>Nomni avto-normallashtirish:</b> kirillni lotinchaga "
             "o'giradi, probellarni «_» ga almashtiradi, maxsus "
             "belgilarni olib tashlaydi.<br><br>"
@@ -372,25 +387,25 @@ class MainWindow(QMainWindow):
             "oldin yoki istalgan vaqtda o'zgartiring."
         ))
 
-    def _on_clipboard_changed(self):
-        if self._ignore_clipboard:
-            return
-        text = self._clipboard.text().strip()
+    def _run_auto_mode_for_current_command(self):
+        """«Joylash» orqali qo'yilgan buyruq uchun avto-rejim amallarini bajaradi."""
+        text = self._cmd_input.get_text()
         if not text:
             return
         if "N_m3u8DL-RE" not in text and "n_m3u8dl-re" not in text.lower():
+            self._log_panel.append_text(
+                "Avto-rejim: buferda N_m3u8DL-RE buyrug'i topilmadi.\n"
+            )
             return
 
         self._tabs.setCurrentIndex(0)
-        self._cmd_input.set_text(text)
-        self._on_parse()
-
-        if not self._parsed:
+        # Joylash signalidan keyin ham aniq joriy buyruqni tahlil qilamiz.
+        self._parsed = parse_command(text)
+        if not self._parsed.url:
             self._log_panel.append_text("Avto-rejim: buyruqni tahlil qilib bo'lmadi\n")
             self._notifier.notify("Avto-rejim", "Buyruqni tahlil qilib bo'lmadi", success=False)
             return
 
-        # Avto-normallashtirish
         if self._auto_normalize_cb.isChecked():
             self._on_normalize()
 
@@ -398,7 +413,7 @@ class MainWindow(QMainWindow):
         dest = "S3" if not self._dest_panel.is_local() else "Lokal"
         self._log_panel.append_text(f"Avto-rejim: {name} → {dest}\n")
 
-        # Yuklash ketayotgan bo'lsa — navbatga qo'shamiz, aks holda darhol yuklaymiz
+        # Yuklash ketayotgan bo'lsa — navbatga qo'shamiz, aks holda darhol yuklaymiz.
         if self._downloader.is_running():
             self._on_add_to_queue()
             self._notifier.notify("Navbatga", f"{name} → {dest}")
@@ -482,9 +497,10 @@ class MainWindow(QMainWindow):
 
     def _update_queue_label(self):
         n = len(self._queue)
-        self._queue_toggle.setText(
-            f"{'▼' if self._queue_toggle.isChecked() else '▶'} Navbat ({n})"
-        )
+        opened = self._queue_toggle.isChecked()
+        arrow = '▼' if opened else '▶'
+        action = "Yashirish" if opened else "Ko'rsatish"
+        self._queue_toggle.setText(f"{arrow} Navbat ({n}) — {action}")
         # Ro'yxatni yangilash
         self._queue_list.clear()
         for i, item in enumerate(self._queue):
@@ -1012,9 +1028,7 @@ class MainWindow(QMainWindow):
         text = panel.toPlainText()
         if not text.strip():
             return
-        self._ignore_clipboard = True
         QApplication.clipboard().setText(text)
-        QTimer.singleShot(100, lambda: setattr(self, '_ignore_clipboard', False))
 
     def _save_log(self, panel: LogPanel):
         text = panel.toPlainText()

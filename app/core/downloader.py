@@ -6,7 +6,7 @@ import shutil
 import sys
 from dataclasses import dataclass
 
-from PyQt6.QtCore import QObject, QProcess, pyqtSignal
+from PySide6.QtCore import QObject, QProcess, Signal
 
 # ANSI escape-ketma-ketliklarni olib tashlash uchun regex
 _ANSI_RE = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
@@ -82,10 +82,10 @@ def format_tool_check_log(statuses: list[ToolStatus]) -> str:
 
 class Downloader(QObject):
     # Oddiy log qatori (qator ko'chishlari, xabarlar) — log paneliga boradi
-    log_received = pyqtSignal(str)
+    log_received = Signal(str)
     # Jarayon qatori (\r) — progress-bar va oxirgi qatorni almashtirishga boradi
-    progress_received = pyqtSignal(str)
-    finished = pyqtSignal(int)  # chiqish kodi
+    progress_received = Signal(str)
+    finished = Signal(int)  # chiqish kodi
 
     def __init__(self, parent=None):
         super().__init__(parent)

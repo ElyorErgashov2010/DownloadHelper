@@ -1,6 +1,6 @@
 """Manzil tanlash paneli: Lokal / S3 (profil tanlash bilan)."""
 
-from PyQt6.QtWidgets import (
+from PySide6.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout, QRadioButton, QLineEdit,
     QPushButton, QFileDialog, QButtonGroup, QCheckBox, QComboBox,
 )

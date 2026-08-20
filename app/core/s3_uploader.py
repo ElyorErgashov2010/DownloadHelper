@@ -3,14 +3,14 @@
 import os
 import time
 
-from PyQt6.QtCore import QThread, pyqtSignal
+from PySide6.QtCore import QThread, Signal
 
 
 class S3Uploader(QThread):
-    progress = pyqtSignal(int)  # foiz 0-100
-    progress_info = pyqtSignal(str)  # "Tezlik: X MiB/s  |  Qoldi: MM:SS"
-    upload_finished = pyqtSignal(bool, str)  # muvaffaqiyat, xabar
-    log_message = pyqtSignal(str)
+    progress = Signal(int)  # foiz 0-100
+    progress_info = Signal(str)  # "Tezlik: X MiB/s  |  Qoldi: MM:SS"
+    upload_finished = Signal(bool, str)  # muvaffaqiyat, xabar
+    log_message = Signal(str)
 
     def __init__(self, local_path: str, s3_key: str, s3_config: dict,
                  delete_local: bool = False, parent=None):

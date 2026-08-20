@@ -1,7 +1,7 @@
 """Log paneli (faqat o'qish uchun), oxirgi qatorni yangilash imkoniyati bilan."""
 
-from PyQt6.QtWidgets import QPlainTextEdit
-from PyQt6.QtGui import QFont, QTextCursor
+from PySide6.QtWidgets import QPlainTextEdit
+from PySide6.QtGui import QFont, QTextCursor
 
 
 class LogPanel(QPlainTextEdit):
