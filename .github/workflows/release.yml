@@ -1,107 +1,247 @@
-name: Build & Update v1.4.0
+name: Build, sign and release
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag (masalan: v1.4.1)"
+        required: true
+        type: string
+
+run-name: Build, sign and release ${{ inputs.release_tag }}
 
 permissions:
+  actions: read
   contents: write
 
 concurrency:
-  group: release-v1.4.0
-  cancel-in-progress: true
+  group: release-${{ inputs.release_tag }}
+  cancel-in-progress: false
 
 jobs:
-  build:
+  build-sign-release:
     runs-on: windows-latest
+    env:
+      SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+      SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+      SIGNPATH_PROJECT_SLUG: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+      SIGNPATH_SIGNING_POLICY_SLUG: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+      SIGNPATH_ARTIFACT_CONFIGURATION_SLUG: ${{ vars.SIGNPATH_ARTIFACT_CONFIGURATION_SLUG }}
 
     steps:
-      - name: Checkout
+      - name: Checkout selected source branch
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup Python
+      - name: Validate release tag and SignPath configuration
+        shell: pwsh
+        run: |
+          if ('${{ github.ref }}' -ne 'refs/heads/main') {
+            throw 'Run this release workflow from the main branch only.'
+          }
+
+          $tag = '${{ inputs.release_tag }}'
+          if ($tag -notmatch '^v\d+\.\d+\.\d+$') {
+            throw "Release tag must have the form vX.Y.Z. Received: $tag"
+          }
+
+          $version = $tag.Substring(1)
+          $resourceText = Get-Content -Raw -Path 'version_info.txt'
+          foreach ($field in @('FileVersion', 'ProductVersion')) {
+            if (-not $resourceText.Contains("StringStruct(u'$field', u'$version')")) {
+              throw "version_info.txt must show $version in $field before publishing $tag."
+            }
+          }
+
+          $required = @(
+            'SIGNPATH_API_TOKEN',
+            'SIGNPATH_ORGANIZATION_ID',
+            'SIGNPATH_PROJECT_SLUG',
+            'SIGNPATH_SIGNING_POLICY_SLUG',
+            'SIGNPATH_ARTIFACT_CONFIGURATION_SLUG'
+          )
+          $missing = $required | Where-Object {
+            [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($_))
+          }
+          if ($missing) {
+            throw "Missing GitHub Actions SignPath configuration: $($missing -join ', '). Configure GitHub Actions Secrets and Variables first."
+          }
+
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Install dependencies
+        shell: pwsh
         run: |
-          pip install -r requirements.txt
-          pip install pyinstaller
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
 
-      - name: Build exe
-        run: pyinstaller --onefile --windowed --name "DownloadHelper" --version-file version_info.txt --noupx main.py
+      - name: Check Python source
+        shell: pwsh
+        run: python -m compileall -q main.py app
+
+      - name: Build DownloadHelper.exe
+        shell: pwsh
+        run: |
+          pyinstaller --noconfirm --clean --onefile --windowed `
+            --name "DownloadHelper" --version-file version_info.txt --noupx main.py
+
+      # SignPath accepts only an artifact uploaded by this GitHub-hosted build.
+      # archive: false uploads the PE file directly, so its artifact configuration
+      # can restrict exactly DownloadHelper.exe instead of a ZIP wrapper.
+      - name: Upload unsigned DownloadHelper.exe for SignPath
+        id: upload-unsigned-exe
+        uses: actions/upload-artifact@v7
+        with:
+          path: dist/DownloadHelper.exe
+          archive: false
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Submit DownloadHelper.exe to SignPath
+        id: sign-downloadhelper
+        uses: signpath/github-action-submit-signing-request@v2
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          artifact-configuration-slug: ${{ vars.SIGNPATH_ARTIFACT_CONFIGURATION_SLUG }}
+          github-artifact-id: ${{ steps.upload-unsigned-exe.outputs.artifact-id }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 3600
+          output-artifact-directory: signed
+          skip-decompress: true
+
+      - name: Verify returned Authenticode signature
+        shell: pwsh
+        run: |
+          $signedExe = Get-ChildItem -Path 'signed' -Recurse -File -Filter 'DownloadHelper.exe' |
+            Select-Object -First 1
+          if ($null -eq $signedExe) {
+            Get-ChildItem -Path 'signed' -Recurse | Format-Table -AutoSize | Out-String | Write-Host
+            throw 'SignPath did not return signed/DownloadHelper.exe.'
+          }
+
+          $signature = Get-AuthenticodeSignature -FilePath $signedExe.FullName
+          if ($signature.Status.ToString() -ne 'Valid') {
+            throw "Returned signature is not valid: $($signature.Status) $($signature.StatusMessage)"
+          }
+          if ($signature.SignerCertificate.Subject -notmatch 'SignPath Foundation') {
+            throw "Unexpected certificate subject: $($signature.SignerCertificate.Subject)"
+          }
+
+          Copy-Item -Path $signedExe.FullName -Destination 'dist/DownloadHelper.exe' -Force
+          Write-Host "Valid SignPath signature: $($signature.SignerCertificate.Subject)"
 
       - name: Download N_m3u8DL-RE
         shell: pwsh
         run: |
           $release = Invoke-RestMethod -Uri "https://api.github.com/repos/nilaoda/N_m3u8DL-RE/releases/latest"
-          $asset = $release.assets | Where-Object { $_.name -match "win-x64" -and $_.name -match "\.zip$" } | Select-Object -First 1
-          Invoke-WebRequest -Uri $asset.browser_download_url -OutFile "n_m3u8dl-re.zip"
-          Expand-Archive -Path "n_m3u8dl-re.zip" -DestinationPath "n_m3u8dl-re_extracted"
-          $exe = Get-ChildItem -Path "n_m3u8dl-re_extracted" -Recurse -Filter "N_m3u8DL-RE.exe" | Select-Object -First 1
-          Copy-Item $exe.FullName -Destination "dist/N_m3u8DL-RE.exe"
+          $asset = $release.assets | Where-Object {
+            $_.name -match 'win-x64' -and $_.name -match '\.zip$'
+          } | Select-Object -First 1
+          if ($null -eq $asset) { throw 'N_m3u8DL-RE Windows x64 ZIP asset was not found.' }
+          Invoke-WebRequest -Uri $asset.browser_download_url -OutFile 'n_m3u8dl-re.zip'
+          Expand-Archive -Path 'n_m3u8dl-re.zip' -DestinationPath 'n_m3u8dl-re_extracted'
+          $exe = Get-ChildItem -Path 'n_m3u8dl-re_extracted' -Recurse -Filter 'N_m3u8DL-RE.exe' |
+            Select-Object -First 1
+          if ($null -eq $exe) { throw 'N_m3u8DL-RE.exe was not found in upstream archive.' }
+          Copy-Item $exe.FullName -Destination 'dist/N_m3u8DL-RE.exe'
 
-      - name: Download ffmpeg
+      - name: Download FFmpeg
         shell: pwsh
         run: |
           $release = Invoke-RestMethod -Uri "https://api.github.com/repos/BtbN/FFmpeg-Builds/releases/latest"
-          $asset = $release.assets | Where-Object { $_.name -match "win64-gpl\.zip$" -and $_.name -notmatch "shared" } | Select-Object -First 1
-          Invoke-WebRequest -Uri $asset.browser_download_url -OutFile "ffmpeg.zip"
-          Expand-Archive -Path "ffmpeg.zip" -DestinationPath "ffmpeg_extracted"
-          $exe = Get-ChildItem -Path "ffmpeg_extracted" -Recurse -Filter "ffmpeg.exe" | Select-Object -First 1
-          Copy-Item $exe.FullName -Destination "dist/ffmpeg.exe"
+          $asset = $release.assets | Where-Object {
+            $_.name -match 'win64-gpl\.zip$' -and $_.name -notmatch 'shared'
+          } | Select-Object -First 1
+          if ($null -eq $asset) { throw 'FFmpeg Windows x64 GPL ZIP asset was not found.' }
+          Invoke-WebRequest -Uri $asset.browser_download_url -OutFile 'ffmpeg.zip'
+          Expand-Archive -Path 'ffmpeg.zip' -DestinationPath 'ffmpeg_extracted'
+          $exe = Get-ChildItem -Path 'ffmpeg_extracted' -Recurse -Filter 'ffmpeg.exe' |
+            Select-Object -First 1
+          if ($null -eq $exe) { throw 'ffmpeg.exe was not found in upstream archive.' }
+          Copy-Item $exe.FullName -Destination 'dist/ffmpeg.exe'
 
-      - name: Download mp4decrypt (Bento4)
+      - name: Download Bento4 mp4decrypt
         shell: pwsh
         run: |
-          Invoke-WebRequest -Uri "https://www.bok.net/Bento4/binaries/Bento4-SDK-1-6-0-641.x86_64-microsoft-win32.zip" -OutFile "bento4.zip"
-          Expand-Archive -Path "bento4.zip" -DestinationPath "bento4_extracted"
-          $exe = Get-ChildItem -Path "bento4_extracted" -Recurse -Filter "mp4decrypt.exe" | Select-Object -First 1
-          Copy-Item $exe.FullName -Destination "dist/mp4decrypt.exe"
+          Invoke-WebRequest `
+            -Uri "https://www.bok.net/Bento4/binaries/Bento4-SDK-1-6-0-641.x86_64-microsoft-win32.zip" `
+            -OutFile 'bento4.zip'
+          Expand-Archive -Path 'bento4.zip' -DestinationPath 'bento4_extracted'
+          $exe = Get-ChildItem -Path 'bento4_extracted' -Recurse -Filter 'mp4decrypt.exe' |
+            Select-Object -First 1
+          if ($null -eq $exe) { throw 'mp4decrypt.exe was not found in Bento4 SDK archive.' }
+          Copy-Item $exe.FullName -Destination 'dist/mp4decrypt.exe'
 
-      - name: List dist contents
-        run: dir dist
-
-      - name: Create zip archive
+      - name: Add licenses and third-party notices to ZIP package
         shell: pwsh
         run: |
-          Compress-Archive -Path "dist/*" -DestinationPath "DownloadHelper-win-x64.zip"
+          New-Item -ItemType Directory -Path 'dist/licenses' -Force | Out-Null
+          Copy-Item 'LICENSE' 'dist/LICENSE.txt'
+          Copy-Item 'THIRD_PARTY_NOTICES.md' 'dist/THIRD_PARTY_NOTICES.txt'
 
-      - name: Move v1.4.0 tag to current main commit
+          $sources = @(
+            @{ Name = 'n_m3u8dl-re_extracted'; Output = 'N_m3u8DL-RE' },
+            @{ Name = 'ffmpeg_extracted'; Output = 'FFmpeg' },
+            @{ Name = 'bento4_extracted'; Output = 'Bento4' }
+          )
+          foreach ($source in $sources) {
+            $license = Get-ChildItem -Path $source.Name -Recurse -File -ErrorAction SilentlyContinue |
+              Where-Object { $_.Name -match '^(LICENSE|COPYING)(\..*)?$' } |
+              Select-Object -First 1
+            if ($null -ne $license) {
+              Copy-Item $license.FullName "dist/licenses/$($source.Output)-$($license.Name)" -Force
+            } else {
+              Write-Warning "No upstream license file found in $($source.Name); see THIRD_PARTY_NOTICES.txt."
+            }
+          }
+
+      - name: Create release ZIP and checksums
         shell: pwsh
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag --force v1.4.0 $env:GITHUB_SHA
-          git push origin refs/tags/v1.4.0 --force
+          Compress-Archive -Path 'dist/*' -DestinationPath 'DownloadHelper-win-x64.zip' -Force
+          $files = @('dist/DownloadHelper.exe', 'DownloadHelper-win-x64.zip')
+          $hashes = foreach ($file in $files) {
+            $hash = Get-FileHash -Path $file -Algorithm SHA256
+            "$($hash.Hash)  $([System.IO.Path]::GetFileName($file))"
+          }
+          Set-Content -Path 'SHA256SUMS.txt' -Value $hashes -Encoding ascii
 
-      - name: Update existing v1.4.0 release
+      - name: Publish signed GitHub Release
         uses: softprops/action-gh-release@v3
         with:
-          tag_name: v1.4.0
-          name: DownloadHelper v1.4.0
-          overwrite_files: true
-          fail_on_unmatched_files: true
+          tag_name: ${{ inputs.release_tag }}
+          target_commitish: ${{ github.sha }}
+          name: DownloadHelper ${{ inputs.release_tag }}
           make_latest: true
+          fail_on_unmatched_files: true
           files: |
             DownloadHelper-win-x64.zip
             dist/DownloadHelper.exe
+            SHA256SUMS.txt
           body: |
-            ## Yuklab olish yordamchisi v1.4.0 - O'zbekcha
+            ## Yuklab olish yordamchisi ${{ inputs.release_tag }}
 
-            Ushbu release `main` branchdagi eng so'nggi kod asosida avtomatik yangilanadi.
+            ### Windows imzosi
+            `DownloadHelper.exe` GitHub-hosted build orqali yaratildi va SignPath Foundation
+            Authenticode imzosi bilan tekshirildi. Windows'da fayl → **Properties** →
+            **Digital Signatures** orqali holatini tekshirish mumkin.
 
-            ### O'zgarishlar
-            - To'liq o'zbekcha interfeys
-            - GitHub link ElyorErgashov2010 ga o'zgartirildi
+            ZIP ichidagi `N_m3u8DL-RE.exe`, `ffmpeg.exe` va `mp4decrypt.exe` mustaqil
+            upstream vositalaridir; ular ushbu loyiha SignPath sertifikati bilan
+            imzolanmagan. Batafsil litsenziya va manbalar ZIP ichidagi
+            `THIRD_PARTY_NOTICES.txt` faylida.
 
-            ### Yuklab olish
-            - **DownloadHelper-win-x64.zip** - barcha kerakli utilitalar bilan (tavsiya etiladi)
-            - **DownloadHelper.exe** - faqat exe (ffmpeg, N_m3u8DL-RE, mp4decrypt alohida kerak)
+            Faqat o'zingiz foydalanishga huquqli bo'lgan media va xizmatlardan foydalaning.
 
-            Asl loyiha: https://github.com/makdinoven/DownloadHelper
+            - **DownloadHelper-win-x64.zip** — dastur va yordamchi vositalar
+            - **DownloadHelper.exe** — faqat imzolangan GUI dastur
+            - **SHA256SUMS.txt** — yuklangan fayllarning SHA-256 tekshiruv summalari
+
+            [Code signing policy](https://github.com/ElyorErgashov2010/DownloadHelper/blob/main/CODE_SIGNING_POLICY.md)
