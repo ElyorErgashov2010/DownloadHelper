@@ -1,0 +1,101 @@
+name: Build test EXE (unsigned)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test-exe:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Check Python source
+        shell: pwsh
+        run: python -m compileall -q main.py app
+
+      - name: Build DownloadHelper.exe
+        shell: pwsh
+        run: |
+          pyinstaller --noconfirm --clean --onefile --windowed `
+            --name "DownloadHelper" --version-file version_info.txt --noupx main.py
+
+      - name: Download N_m3u8DL-RE
+        shell: pwsh
+        run: |
+          $release = Invoke-RestMethod -Uri "https://api.github.com/repos/nilaoda/N_m3u8DL-RE/releases/latest"
+          $asset = $release.assets | Where-Object {
+            $_.name -match 'win-x64' -and $_.name -match '\.zip$'
+          } | Select-Object -First 1
+          if ($null -eq $asset) { throw 'N_m3u8DL-RE Windows x64 ZIP asset was not found.' }
+          Invoke-WebRequest -Uri $asset.browser_download_url -OutFile 'n_m3u8dl-re.zip'
+          Expand-Archive -Path 'n_m3u8dl-re.zip' -DestinationPath 'n_m3u8dl-re_extracted'
+          $exe = Get-ChildItem -Path 'n_m3u8dl-re_extracted' -Recurse -Filter 'N_m3u8DL-RE.exe' |
+            Select-Object -First 1
+          if ($null -eq $exe) { throw 'N_m3u8DL-RE.exe was not found in upstream archive.' }
+          Copy-Item $exe.FullName -Destination 'dist/N_m3u8DL-RE.exe'
+
+      - name: Download FFmpeg
+        shell: pwsh
+        run: |
+          $release = Invoke-RestMethod -Uri "https://api.github.com/repos/BtbN/FFmpeg-Builds/releases/latest"
+          $asset = $release.assets | Where-Object {
+            $_.name -match 'win64-gpl\.zip$' -and $_.name -notmatch 'shared'
+          } | Select-Object -First 1
+          if ($null -eq $asset) { throw 'FFmpeg Windows x64 GPL ZIP asset was not found.' }
+          Invoke-WebRequest -Uri $asset.browser_download_url -OutFile 'ffmpeg.zip'
+          Expand-Archive -Path 'ffmpeg.zip' -DestinationPath 'ffmpeg_extracted'
+          $exe = Get-ChildItem -Path 'ffmpeg_extracted' -Recurse -Filter 'ffmpeg.exe' |
+            Select-Object -First 1
+          if ($null -eq $exe) { throw 'ffmpeg.exe was not found in upstream archive.' }
+          Copy-Item $exe.FullName -Destination 'dist/ffmpeg.exe'
+
+      - name: Download Bento4 mp4decrypt
+        shell: pwsh
+        run: |
+          Invoke-WebRequest `
+            -Uri "https://www.bok.net/Bento4/binaries/Bento4-SDK-1-6-0-641.x86_64-microsoft-win32.zip" `
+            -OutFile 'bento4.zip'
+          Expand-Archive -Path 'bento4.zip' -DestinationPath 'bento4_extracted'
+          $exe = Get-ChildItem -Path 'bento4_extracted' -Recurse -Filter 'mp4decrypt.exe' |
+            Select-Object -First 1
+          if ($null -eq $exe) { throw 'mp4decrypt.exe was not found in Bento4 SDK archive.' }
+          Copy-Item $exe.FullName -Destination 'dist/mp4decrypt.exe'
+
+      - name: Add notices and create test ZIP
+        shell: pwsh
+        run: |
+          Copy-Item 'LICENSE' 'dist/LICENSE.txt'
+          Copy-Item 'THIRD_PARTY_NOTICES.md' 'dist/THIRD_PARTY_NOTICES.txt'
+          Compress-Archive -Path 'dist/*' -DestinationPath 'DownloadHelper-test-win-x64.zip' -Force
+          $files = @('dist/DownloadHelper.exe', 'DownloadHelper-test-win-x64.zip')
+          $hashes = foreach ($file in $files) {
+            $hash = Get-FileHash -Path $file -Algorithm SHA256
+            "$($hash.Hash)  $([System.IO.Path]::GetFileName($file))"
+          }
+          Set-Content -Path 'SHA256SUMS.txt' -Value $hashes -Encoding ascii
+
+      - name: Upload test build
+        uses: actions/upload-artifact@v7
+        with:
+          name: DownloadHelper-test-win-x64
+          path: |
+            DownloadHelper-test-win-x64.zip
+            SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 7
