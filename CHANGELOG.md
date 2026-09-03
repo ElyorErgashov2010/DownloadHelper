@@ -1,0 +1,41 @@
+# O'zgarishlar tarixi
+
+Ushbu faylda DownloadHelper'dagi foydalanuvchi uchun muhim o'zgarishlar
+saqlanadi.
+
+## [Unreleased]
+
+### Qo'shildi
+
+- Buyruq yoniga **«Joylash»** tugmasi qo'shildi. U almashinuv buferidagi
+  matnni Ctrl+V kabi Buyruq maydoniga joylaydi.
+- **Avto-rejim** endi buferni doimiy kuzatmaydi: buyruq nusxalangach
+  foydalanuvchi **«Joylash»** tugmasini bosadi, so'ng dastur tahlil,
+  nomni normallashtirish va yuklash/navbat amallarini bajaradi.
+- Navbat tugmasi aniq ko'rinishi uchun ramka, hover holati va
+  **«Ko'rsatish / Yashirish»** yozuvlari qo'shildi.
+- README'ga interfeys screenshotsi, qisqa boshlash bo'limi va fikr bildirish
+  yo'li qo'shildi.
+- `CONTRIBUTING.md` orqali xato va taklif yuborish tartibi qo'shildi.
+
+### O'zgardi
+
+- GUI bog'liqligi PyQt6 o'rniga `PySide6-Essentials`ga o'tkazildi.
+- Fayl nomi transliteratsiyasi `text-unidecode`dan foydalanadi.
+- `version_info.txt`ning foydalanuvchi ko'radigan versiyasi `1.4.1`ga
+  tayyorlandi.
+
+### Imzolash holati
+
+- SignPath bilan GitHub Actions imzolash workflow'i tayyorlangan.
+- Hozircha SignPath Foundation sertifikati faol emas; shu sabab faqat
+  **Digital Signatures** oynasida `Valid` bo'lib tekshirilgan faylni
+  imzolangan deb hisoblash mumkin.
+
+## [1.4.0]
+
+### Qo'shildi
+
+- O'zbekcha interfeys va foydalanuvchi qo'llanmasi.
+- N_m3u8DL-RE buyruqlarini tahlil qilish, navbat, progress/loglar va
+  lokal yoki S3-mos saqlash imkoniyatlari.

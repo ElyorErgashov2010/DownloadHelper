@@ -15,6 +15,10 @@ Foydalanuvchi Telegram-botdan ishga tushirish buyrug'ini nusxalaydi, dasturga qo
 
 > Faqat foydalanishga, yuklab olishga va qayta ishlashga huquqingiz bo'lgan media hamda xizmatlardan foydalaning.
 
+## Interfeys
+
+![DownloadHelper asosiy oynasi: Buyruqni tahlil qilish, Joylash, Navbat va yuklash boshqaruvlari](docs/images/downloadhelper-interface.png)
+
 ---
 
 ## Yuklab olish
@@ -30,18 +34,38 @@ Arxiv ichida:
 
 Hammasi bir papkada bo'lishi kerak.
 
+### Tez boshlash
+
+1. GitHub **Releases** sahifasidan ZIP faylni yuklab oling va Extract All qiling.
+2. To'rtta `.exe` fayl bir papkada turganini tekshiring.
+3. `DownloadHelper.exe`ni oching.
+4. Telegram bot qaytargan N_m3u8DL-RE buyrug'ini nusxalang va **«Joylash»**ni bosing.
+5. Saqlash joyini tanlang, so'ng **«Yuklab olish»**ni bosing.
+
 ### Windows imzosi va xavfsizlik
 
-`v1.4.1`dan boshlab release workflow `DownloadHelper.exe`ni SignPath Foundation
-orqali imzolash uchun tayyorlangan. Imzo faqat GitHub Release sahifasida
-**Digital Signatures** bo'limida `Valid` holatda ko'rinsa haqiqiy hisoblanadi.
+**Joriy holat:** ommaviy Windows code-signing sertifikati hali faol emas.
+Shuning uchun faqat faylning **Properties → Digital Signatures** bo'limida
+`Valid` holati ko'rinsa uni imzolangan deb hisoblang.
 
-- Oddiy foydalanuvchilar sertifikat o'rnatmaydi va CMD yozmaydi.
+- SignPath bilan GitHub Actions imzolash workflow'i tayyorlangan, ammo faqat
+  faol sertifikat/obuna bo'lgach ishlatiladi.
+- Oddiy foydalanuvchilar sertifikat o'rnatmasligi kerak bo'lgan yechim uchun
+  ommaviy ishonchli code-signing sertifikati talab qilinadi.
 - `N_m3u8DL-RE.exe`, `ffmpeg.exe` va `mp4decrypt.exe` alohida upstream
-  vositalardir; ular ushbu loyiha sertifikati bilan imzolanmaydi va Windows
+  vositalardir; ular bu loyiha sertifikati bilan imzolanmaydi va Windows
   tomonidan alohida baholanishi mumkin.
 - To'liq tartib: [CODE_SIGNING_POLICY.md](CODE_SIGNING_POLICY.md).
 - Litsenziya/manba eslatmalari: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+---
+
+## Fikr, xato va takliflar
+
+Dastur sizga foydali bo'lsa, GitHub'da **Star** bosing yoki haqiqiy tajribangiz,
+xato va takliflarni [Issues](https://github.com/ElyorErgashov2010/DownloadHelper/issues)
+bo'limida qoldiring. Xato haqida qanday yozish kerakligi:
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
@@ -279,4 +303,6 @@ Downloader/
 
 - Muallif va maintainer: [ElyorErgashov2010](https://github.com/ElyorErgashov2010)
 - Loyiha kodi: [MIT License](LICENSE)
+- O'zgarishlar tarixi: [CHANGELOG.md](CHANGELOG.md)
+- Fikr, xato va hissa qo'shish: [CONTRIBUTING.md](CONTRIBUTING.md)
 - Release ZIP ichidagi mustaqil vositalar: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)

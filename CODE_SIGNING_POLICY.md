@@ -1,18 +1,20 @@
 # Code signing policy (Kod imzolash siyosati)
 
-> **Holati:** ushbu siyosat SignPath Foundation arizasi uchun tayyorlangan.
-> GitHub Release'dagi faylda Windows digital signature `Valid` holatida
+> **Joriy holat:** SignPath Foundation orqali ommaviy imzolash hozir faol
+> emas. GitHub Release'dagi faylda Windows digital signature `Valid` holatida
 > ko'rinmaguncha u imzolangan deb hisoblanmaydi.
 
 ## Nashriyot va qamrov
 
+Agar loyiha kelajakda SignPath Foundation tomonidan qabul qilinsa, quyidagi
+standart xabar ishlatiladi:
+
 **Free code signing provided by [SignPath.io](https://about.signpath.io/),
 certificate by [SignPath Foundation](https://signpath.org/).**
 
-Agar loyiha SignPath Foundation tomonidan qabul qilinsa, imzolangan
-`DownloadHelper.exe` faylining Windows'dagi nashriyotchisi **SignPath
-Foundation** sifatida ko'rinadi. Sertifikat GitHub akkauntiga shaxsan berilgan
-sertifikat emas.
+Shunda imzolangan `DownloadHelper.exe` faylining Windows'dagi nashriyotchisi
+**SignPath Foundation** sifatida ko'rinadi. Sertifikat GitHub akkauntiga
+shaxsan berilgan sertifikat emas.
 
 Imzo faqat shu repository kodidan GitHub Actions orqali yig'ilgan
 `DownloadHelper.exe`ga tegishli. U fayl imzolangandan keyin o'zgartirilmaganini
