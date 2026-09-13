@@ -40,8 +40,8 @@ Hammasi bir papkada bo'lishi kerak.
 2. To'rtta `.exe` fayl bir papkada turganini tekshiring.
 3. `DownloadHelper.exe`ni oching va **Vositalar holati** panelida uchala vosita
    `Tayyor` ekanini tekshiring.
-4. Telegram bot qaytargan N_m3u8DL-RE buyrug'ini nusxalang va **«Joylash»**ni bosing.
-5. Saqlash joyini tanlang, so'ng **«Yuklab olish»**ni bosing.
+4. Telegram bot qaytargan N_m3u8DL-RE buyrug'ini nusxalang va **«Joylash»** ni bosing.
+5. Saqlash joyini tanlang, so'ng **«Yuklab olish»** ni bosing.
 6. Yuklash tugagach **«Papka ochish»** orqali tayyor fayl joylashgan papkani oching.
 
 ### Windows imzosi va xavfsizlik
