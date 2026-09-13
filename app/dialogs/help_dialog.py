@@ -119,12 +119,27 @@ tozalash mumkin.</p>
 Progress-bar yuklash foizini, tezligini va qolgan vaqtni ko'rsatadi.
 Bir nechta oqim (video, audio, subtitr) yuklanayotganda hozirgi faol
 oqimning jarayoni ko'rsatiladi.<br>
+Log maydonining pastki o'ng burchagidagi diagonal belgini tortib uning
+balandligini o'zgartirish mumkin.<br>
 Log sarlavhasi yonidagi <b>«Nusxalash»</b> va <b>«Saqlash»</b> tugmalari
 orqali logni buferga nusxalash yoki faylga saqlash mumkin.</p>
 
 <p><b>9. Diskda joy tekshiruvi</b><br>
 Har bir yuklashdan oldin kamida 500 MB bo'sh joy borligi tekshiriladi.
 Joy yetarli bo'lmasa, vazifa o'tkazib yuboriladi.</p>
+
+<hr>
+
+<h3>Kichik oynada ishlash</h3>
+
+<p>Oyna kichraytirilsa, <b>«Yangi vazifa»</b> varag'ining o'ng tomonida
+vertikal scroll paydo bo'ladi. Ingichka tutqich ustiga sichqoncha olib
+borilganda kengayadi. Yuqori va pastki uchburchaklar bir qadam siljitadi,
+tutqichni tortib esa kerakli joyga tez o'tish mumkin.</p>
+
+<p><b>Loglar</b> maydonining pastki o'ng burchagida diagonal kattalashtirish
+belgisi bor. Uni tortib log balandligini kattalashtirish yoki kichraytirish
+mumkin.</p>
 
 <hr>
 

@@ -37,7 +37,8 @@ class CommandInput(QWidget):
 
         self.text_edit = _PasteAwareTextEdit()
         self.text_edit.setPlaceholderText("N_m3u8DL-RE buyrug'ini shu yerga qo'ying...")
-        self.text_edit.setMaximumHeight(100)
+        # Kichik oynada buyruq maydoni yo'qolib ketmasligi uchun doimiy balandlik.
+        self.text_edit.setFixedHeight(100)
         self.text_edit.pasted.connect(self._on_pasted)
         layout.addWidget(self.text_edit)
 

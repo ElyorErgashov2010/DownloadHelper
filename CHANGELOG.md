@@ -21,6 +21,10 @@ saqlanadi.
   ochadi.
 - **«Formani tozalash»** tugmasi buyruq, nom, progress va loglarni yangi vazifa
   uchun tozalaydi.
+- Kichik oyna uchun yuqori/pastki uchburchakli, hover'da kengayadigan ingichka
+  vertikal scroll qo'shildi; Buyruq maydoni endi siqilib yo'qolib ketmaydi.
+- Loglar maydonining pastki o'ng burchagiga tortib balandligini o'zgartirish
+  tutqichi qo'shildi.
 - README'ga interfeys screenshotsi, qisqa boshlash bo'limi va fikr bildirish
   yo'li qo'shildi.
 - `CONTRIBUTING.md` orqali xato va taklif yuborish tartibi qo'shildi.

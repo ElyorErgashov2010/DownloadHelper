@@ -40,9 +40,19 @@ Hammasi bir papkada bo'lishi kerak.
 2. To'rtta `.exe` fayl bir papkada turganini tekshiring.
 3. `DownloadHelper.exe`ni oching va **Vositalar holati** panelida uchala vosita
    `Tayyor` ekanini tekshiring.
-4. Telegram bot qaytargan N_m3u8DL-RE buyrug'ini nusxalang va **«Joylash»** ni bosing.
-5. Saqlash joyini tanlang, so'ng **«Yuklab olish»** ni bosing.
+4. Telegram bot qaytargan N_m3u8DL-RE buyrug'ini nusxalang va **«Joylash»**ni bosing.
+5. Saqlash joyini tanlang, so'ng **«Yuklab olish»**ni bosing.
 6. Yuklash tugagach **«Papka ochish»** orqali tayyor fayl joylashgan papkani oching.
+
+### Kichik oynada ishlash
+
+- Oyna kichraytirilsa, **Yangi vazifa** varag'ining o'ng tomonida ingichka
+  vertikal scroll paydo bo'ladi. Ustiga sichqoncha olib borilganda tutqichi
+  kengayadi.
+- Scrollning yuqori va pastki uchburchaklari orqali bitta qadam yuqoriga yoki
+  pastga siljish mumkin; tutqichni tortib istalgan qismga o'ting.
+- **Loglar** maydonining pastki o'ng burchagidagi diagonal belgi orqali log
+  balandligini kattalashtirish yoki kichraytirish mumkin.
 
 ### Windows imzosi va xavfsizlik
 
@@ -202,6 +212,8 @@ botiga yuboring. Bot N_m3u8DL-RE uchun tayyor buyruqni qaytaradi.
 - Bir nechta oqim (video, audio, subtitr) yuklanayotganda hozirgi faol oqimning
   jarayoni ko'rsatiladi
 - N_m3u8DL-RE chiqishi real vaqtda ko'rsatiladigan log paneli
+- Log maydonining pastki o'ng burchagidagi diagonal belgi orqali uning
+  balandligini o'zingizga qulay qilib o'zgartirish mumkin
 - **«Nusxalash»** va **«Saqlash»** tugmalari logni buferga nusxalash yoki faylga
   saqlash imkonini beradi
 
@@ -300,7 +312,8 @@ Downloader/
 │   │   ├── destination_panel.py   # Lokal / S3 almashtirgich (profillar bilan)
 │   │   ├── progress_panel.py      # Progress-bar (Vid/Aud/Sub oqimlari bo'yicha)
 │   │   ├── task_list.py           # Vazifalar tarixi jadvali
-│   │   └── log_panel.py           # Log paneli
+│   │   ├── log_panel.py           # Log paneli + kattalashtirish tutqichi
+│   │   └── slim_scrollbar.py       # Kichik oyna uchun ingichka scroll
 │   ├── dialogs/
 │   │   ├── s3_config_dialog.py    # S3 profil menejeri
 │   │   └── help_dialog.py         # Yordam / foydalanuvchi qo'llanmasi

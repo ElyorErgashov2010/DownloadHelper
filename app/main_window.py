@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from PySide6.QtWidgets import (
     QMainWindow, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QMessageBox, QSpinBox, QFileDialog, QListWidget,
-    QListWidgetItem, QCheckBox, QApplication, QFrame,
+    QListWidgetItem, QCheckBox, QApplication, QFrame, QScrollArea, QLayout,
 )
 from PySide6.QtCore import QSize, Qt, QTimer, QUrl
 from PySide6.QtGui import QDesktopServices
@@ -25,6 +25,7 @@ from app.widgets.file_name_edit import FileNameEdit
 from app.widgets.destination_panel import DestinationPanel
 from app.widgets.log_panel import LogPanel
 from app.widgets.progress_panel import ProgressPanel
+from app.widgets.slim_scrollbar import SlimVerticalScrollBar
 from app.widgets.task_list import TaskList
 from app.dialogs.s3_config_dialog import S3ConfigDialog
 from app.dialogs.help_dialog import HelpDialog
@@ -144,8 +145,19 @@ class MainWindow(QMainWindow):
     # ── «Yangi vazifa» varag'i ───────────────────────────────────
 
     def _build_new_task_tab(self):
-        tab = QWidget()
-        layout = QVBoxLayout(tab)
+        # Kichik oynada formani siqib yubormaslik uchun faqat shu varaq scroll qilinadi.
+        tab = QScrollArea()
+        tab.setWidgetResizable(True)
+        tab.setFrameShape(QFrame.Shape.NoFrame)
+        tab.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        tab.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self._new_task_scrollbar = SlimVerticalScrollBar(tab)
+        tab.setVerticalScrollBar(self._new_task_scrollbar)
+
+        task_content = QWidget()
+        task_content.setMinimumWidth(660)
+        layout = QVBoxLayout(task_content)
+        layout.setSizeConstraint(QLayout.SizeConstraint.SetMinimumSize)
 
         self._cmd_input = CommandInput()
         self._cmd_input.parse_btn.clicked.connect(self._on_parse)
@@ -311,9 +323,10 @@ class MainWindow(QMainWindow):
         log_header.addWidget(save_log_btn)
         layout.addLayout(log_header)
 
-        self._log_panel = LogPanel()
+        self._log_panel = LogPanel(resizable=True)
         layout.addWidget(self._log_panel, 1)
 
+        tab.setWidget(task_content)
         self._tabs.addTab(tab, "Yangi vazifa")
 
     # ── «Tarix» varag'i ──────────────────────────────────────────
