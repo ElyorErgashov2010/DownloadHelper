@@ -43,6 +43,11 @@ Yuklash boshlanganda dastur uchala vositaning mavjudligini avtomatik
 tekshiradi va natijani logga chiqaradi. Agar biror vosita topilmasa —
 yuklash boshlanmaydi.</p>
 
+<p><b>Vositalar holati</b><br>
+Buyruq qatori ostidagi panel N_m3u8DL-RE, ffmpeg va mp4decrypt topilganini
+<b>Tayyor</b> yoki <b>Topilmadi</b> holatida ko'rsatadi. Fayllarni dastur
+papkasiga qo'ygandan keyin <b>«Qayta tekshirish»</b> tugmasini bosing.</p>
+
 <hr>
 
 <h3>«Yangi vazifa» varag'i</h3>
@@ -104,6 +109,10 @@ tozalash mumkin.</p>
 <ul>
   <li><b>«Yuklab olish»</b> — yuklashni (yoki navbatni) boshlaydi</li>
   <li><b>«Bekor qilish»</b> — joriy yuklashni to'xtatadi va navbatni tozalaydi</li>
+  <li><b>«Papka ochish»</b> — oxirgi muvaffaqiyatli yuklashning lokal papkasini
+      Windows Explorer'da ochadi</li>
+  <li><b>«Formani tozalash»</b> — buyruq, nom, progress va loglarni tozalaydi;
+      Lokal/S3 sozlamalari hamda navbat saqlanadi</li>
 </ul>
 
 <p><b>8. Jarayon va loglar</b><br>

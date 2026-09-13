@@ -14,6 +14,13 @@ saqlanadi.
   nomni normallashtirish va yuklash/navbat amallarini bajaradi.
 - Navbat tugmasi aniq ko'rinishi uchun ramka, hover holati va
   **«Ko'rsatish / Yashirish»** yozuvlari qo'shildi.
+- **«Vositalar holati»** paneli va **«Qayta tekshirish»** tugmasi qo'shildi.
+  N_m3u8DL-RE, ffmpeg va mp4decrypt topilgan/topilmagani yuklashdan oldin
+  ko'rinadi.
+- Yuklash tugagach **«Papka ochish»** tugmasi oxirgi lokal yuklash papkasini
+  ochadi.
+- **«Formani tozalash»** tugmasi buyruq, nom, progress va loglarni yangi vazifa
+  uchun tozalaydi.
 - README'ga interfeys screenshotsi, qisqa boshlash bo'limi va fikr bildirish
   yo'li qo'shildi.
 - `CONTRIBUTING.md` orqali xato va taklif yuborish tartibi qo'shildi.

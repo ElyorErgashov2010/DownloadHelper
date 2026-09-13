@@ -38,9 +38,11 @@ Hammasi bir papkada bo'lishi kerak.
 
 1. GitHub **Releases** sahifasidan ZIP faylni yuklab oling va Extract All qiling.
 2. To'rtta `.exe` fayl bir papkada turganini tekshiring.
-3. `DownloadHelper.exe`ni oching.
+3. `DownloadHelper.exe`ni oching va **Vositalar holati** panelida uchala vosita
+   `Tayyor` ekanini tekshiring.
 4. Telegram bot qaytargan N_m3u8DL-RE buyrug'ini nusxalang va **«Joylash»**ni bosing.
 5. Saqlash joyini tanlang, so'ng **«Yuklab olish»**ni bosing.
+6. Yuklash tugagach **«Papka ochish»** orqali tayyor fayl joylashgan papkani oching.
 
 ### Windows imzosi va xavfsizlik
 
@@ -154,6 +156,14 @@ botiga yuboring. Bot N_m3u8DL-RE uchun tayyor buyruqni qaytaradi.
 - **«Normallashtirish»** — kirillni lotinchaga o'giradi, probel va maxsus belgilarni
   pastki chiziqqa almashtiradi («Ўзбек видео» → `Uzbek_video`)
 
+#### Vositalar holati
+- **«Vositalar holati»** paneli N_m3u8DL-RE, ffmpeg va mp4decrypt topilganini
+  darhol ko'rsatadi: `Tayyor` yoki `Topilmadi`
+- Fayllarni dastur papkasiga qo'ygandan so'ng **«Qayta tekshirish»** tugmasini
+  bosing
+- Biror vosita `Topilmadi` holatida bo'lsa, yuklashni boshlashdan oldin uni
+  dastur joylashgan papkaga qo'ying
+
 #### Saqlash joyi
 - **Lokal** — **«Tanlash...»** tugmasi bilan papka tanlanadi. Oxirgi papka seanslar
   orasida eslab qolinadi
@@ -194,6 +204,13 @@ botiga yuboring. Bot N_m3u8DL-RE uchun tayyor buyruqni qaytaradi.
 - N_m3u8DL-RE chiqishi real vaqtda ko'rsatiladigan log paneli
 - **«Nusxalash»** va **«Saqlash»** tugmalari logni buferga nusxalash yoki faylga
   saqlash imkonini beradi
+
+#### Yuklash tugagach
+- **«Papka ochish»** — oxirgi muvaffaqiyatli yuklashning lokal papkasini Windows
+  Explorer'da ochadi
+- **«Formani tozalash»** — buyruq, fayl nomi, progress va loglarni tozalab,
+  yangi vazifaga tayyorlaydi; Lokal/S3 sozlamalari hamda navbat saqlanadi
+- Yuklash davom etayotgan paytda Formani tozalash ishlamaydi
 
 #### Bo'sh joyni tekshirish
 - Har bir yuklashdan oldin kamida 500 MB bo'sh joy borligi tekshiriladi. Joy

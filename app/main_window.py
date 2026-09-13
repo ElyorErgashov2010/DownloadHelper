@@ -8,9 +8,10 @@ from dataclasses import dataclass
 from PySide6.QtWidgets import (
     QMainWindow, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QMessageBox, QSpinBox, QFileDialog, QListWidget,
-    QListWidgetItem, QCheckBox, QApplication,
+    QListWidgetItem, QCheckBox, QApplication, QFrame,
 )
-from PySide6.QtCore import QSize, Qt, QTimer
+from PySide6.QtCore import QSize, Qt, QTimer, QUrl
+from PySide6.QtGui import QDesktopServices
 
 from app.core.command_parser import parse_command, ParsedCommand
 from app.core.normalizer import normalize_filename
@@ -69,6 +70,7 @@ class MainWindow(QMainWindow):
         self._queue: list[QueueItem] = []
         self._s3_failures: list[S3Failure] = []
         self._parsed: ParsedCommand | None = None
+        self._last_output_dir = ""
 
         # Jarayon yangilanishini cheklash (200 ms da bir martadan ko'p emas)
         self._progress_timer = QTimer(self)
@@ -137,6 +139,7 @@ class MainWindow(QMainWindow):
 
         # S3 profillarini kombo-boksga yuklash
         self._refresh_s3_profiles()
+        self._refresh_tools_status()
 
     # ── «Yangi vazifa» varag'i ───────────────────────────────────
 
@@ -149,6 +152,26 @@ class MainWindow(QMainWindow):
         self._cmd_input.paste_btn.clicked.connect(self._on_paste_command)
         self._cmd_input.auto_parse_requested.connect(self._on_parse)
         layout.addWidget(self._cmd_input)
+
+        # Yordamchi executable fayllarning holati — yuklashdan oldin ham ko'rinadi.
+        self._tools_status_box = QFrame()
+        self._tools_status_box.setStyleSheet(
+            "QFrame { border: 1px solid #666666; border-radius: 5px; padding: 2px; }"
+        )
+        tools_layout = QHBoxLayout(self._tools_status_box)
+        tools_layout.setContentsMargins(8, 4, 8, 4)
+        tools_title = QLabel("Vositalar holati:")
+        tools_title.setStyleSheet("font-weight: bold;")
+        tools_layout.addWidget(tools_title)
+        self._tools_status_label = QLabel()
+        self._tools_status_label.setWordWrap(True)
+        self._tools_status_label.setTextFormat(Qt.TextFormat.RichText)
+        tools_layout.addWidget(self._tools_status_label, 1)
+        self._tools_status_refresh_btn = QPushButton("Qayta tekshirish")
+        self._tools_status_refresh_btn.setToolTip("Yordamchi vositalar holatini qayta tekshirish")
+        self._tools_status_refresh_btn.clicked.connect(self._refresh_tools_status)
+        tools_layout.addWidget(self._tools_status_refresh_btn)
+        layout.addWidget(self._tools_status_box)
 
         self._file_name = FileNameEdit()
         self._file_name.normalize_btn.clicked.connect(self._on_normalize)
@@ -180,6 +203,20 @@ class MainWindow(QMainWindow):
         ctrl_row.addWidget(self._stop_btn)
         ctrl_row.addStretch()
         layout.addLayout(ctrl_row)
+
+        # Ikkinchi darajali amallar — joriy yuklashni tasodifan buzmaydi.
+        utility_row = QHBoxLayout()
+        self._clear_form_btn = QPushButton("Formani tozalash")
+        self._clear_form_btn.setToolTip("Buyruq, nom, progress va loglarni tozalash")
+        self._clear_form_btn.clicked.connect(self._on_clear_form)
+        utility_row.addWidget(self._clear_form_btn)
+        self._open_folder_btn = QPushButton("Papka ochish")
+        self._open_folder_btn.setToolTip("Oxirgi muvaffaqiyatli yuklash papkasini ochish")
+        self._open_folder_btn.setEnabled(False)
+        self._open_folder_btn.clicked.connect(self._on_open_output_folder)
+        utility_row.addWidget(self._open_folder_btn)
+        utility_row.addStretch()
+        layout.addLayout(utility_row)
 
         # Ochiladigan navbat — ramkali tugma, tugma ekanligi aniq ko'rinadi.
         queue_header = QHBoxLayout()
@@ -319,6 +356,67 @@ class MainWindow(QMainWindow):
         self._dest_panel.load_s3_profiles(names, active)
 
     # ── Umumiy slotlar ───────────────────────────────────────────
+
+    def _refresh_tools_status(self):
+        """Yordamchi executable fayllar topilganini UI'da ko'rsatadi."""
+        statuses = check_all_tools()
+        parts = []
+        paths = []
+        for status in statuses:
+            if status.found:
+                parts.append(
+                    f'<span style="color:#28a745;">●</span> '
+                    f'<b>{status.name}</b> — Tayyor'
+                )
+                paths.append(f'{status.name}: {status.path}')
+            else:
+                parts.append(
+                    f'<span style="color:#d9534f;">●</span> '
+                    f'<b>{status.name}</b> — Topilmadi'
+                )
+                paths.append(f'{status.name}: Topilmadi')
+        self._tools_status_label.setText("&nbsp;&nbsp;|&nbsp;&nbsp;".join(parts))
+        self._tools_status_label.setToolTip("\n".join(paths))
+        return statuses
+
+    def _on_clear_form(self):
+        """Yangi vazifa uchun joriy forma ma'lumotlarini tozalaydi."""
+        if self._downloader.is_running() or (self._uploader and self._uploader.isRunning()):
+            return
+        self._cmd_input.set_text("")
+        self._cmd_input.text_edit.setFocus()
+        self._file_name.set_name("")
+        self._parsed = None
+        self._progress_timer.stop()
+        self._stream_lines.clear()
+        self._full_log.clear()
+        self._progress.reset()
+        self._progress.set_status("")
+        self._log_panel.clear()
+
+    def _set_last_output_directory(self, directory: str):
+        """Oxirgi muvaffaqiyatli yuklash papkasini eslab qoladi."""
+        if directory and os.path.isdir(directory):
+            self._last_output_dir = directory
+            self._open_folder_btn.setEnabled(True)
+
+    def _on_open_output_folder(self):
+        """Oxirgi tayyor fayl joylashgan lokal papkani tizim fayl oynasida ochadi."""
+        if not self._last_output_dir or not os.path.isdir(self._last_output_dir):
+            QMessageBox.information(
+                self,
+                "Papka topilmadi",
+                "Avval muvaffaqiyatli yuklashni yakunlang.",
+            )
+            self._open_folder_btn.setEnabled(False)
+            return
+        opened = QDesktopServices.openUrl(QUrl.fromLocalFile(self._last_output_dir))
+        if not opened:
+            QMessageBox.warning(
+                self,
+                "Xato",
+                "Papka oynasini ochib bo'lmadi.",
+            )
 
     def _on_parse(self):
         raw = self._cmd_input.get_text()
@@ -632,6 +730,7 @@ class MainWindow(QMainWindow):
 
     def _process_next_in_queue(self):
         if not self._queue:
+            self._clear_form_btn.setEnabled(True)
             self._update_queue_label()
             if self._s3_failures:
                 n = len(self._s3_failures)
@@ -670,8 +769,8 @@ class MainWindow(QMainWindow):
             self._start_s3_upload(item)
             return
 
-        # Vositalarni tekshirish
-        statuses = check_all_tools()
+        # Vositalarni tekshirish va holat panelini yangilash
+        statuses = self._refresh_tools_status()
         self._log(format_tool_check_log(statuses))
         missing = [s.name for s in statuses if not s.found]
         if missing:
@@ -723,6 +822,7 @@ class MainWindow(QMainWindow):
         self._log(f"Ishga tushirish: {' '.join(args)}\n\n")
         self._download_btn.setEnabled(False)
         self._stop_btn.setEnabled(True)
+        self._clear_form_btn.setEnabled(False)
         self._downloader.start(args)
 
     def _on_stop(self):
@@ -754,6 +854,7 @@ class MainWindow(QMainWindow):
         self._progress_timer.stop()
         self._download_btn.setEnabled(True)
         self._stop_btn.setEnabled(False)
+        self._clear_form_btn.setEnabled(True)
         self._progress.set_finished(False)
         self._progress.set_status("Bekor qilindi")
         if not item or not item.task_id:
@@ -872,6 +973,7 @@ class MainWindow(QMainWindow):
             self._start_s3_upload(item)
         else:
             self._progress.set_finished(True)
+            self._set_last_output_directory(item.save_dir)
             if item.task_id:
                 self._task_mgr.update_status(item.task_id, "Done")
                 self._save_task_log(item.task_id)
@@ -888,6 +990,7 @@ class MainWindow(QMainWindow):
         self._progress.reset()
         self._progress.set_status("S3 ga yuklanmoqda...")
         self._stop_btn.setEnabled(True)
+        self._clear_form_btn.setEnabled(False)
         self._log("\nS3 ga yuklash boshlanmoqda...\n")
 
         # Saqlangan yo'l bo'lsa (S3 qayta urinish), shuni ishlatamiz
@@ -964,6 +1067,8 @@ class MainWindow(QMainWindow):
                 "S3 xatosi", f"{item.name} — {message}", success=False
             )
         self._progress.set_finished(success)
+        if success and item:
+            self._set_last_output_directory(item.save_dir)
         self._current_item = None
         self._uploader = None
         self._download_btn.setEnabled(True)
