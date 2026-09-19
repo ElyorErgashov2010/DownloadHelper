@@ -28,6 +28,10 @@ saqlanadi.
 - README'ga interfeys screenshotsi, qisqa boshlash bo'limi va fikr bildirish
   yo'li qo'shildi.
 - `CONTRIBUTING.md` orqali xato va taklif yuborish tartibi qo'shildi.
+- Haqiqiy beta test uchun imzosiz `vX.Y.Z-beta.N` GitHub Pre-release workflow'i
+  tayyorlandi.
+- Code of Conduct, Security Policy, Issue template va Pull Request template
+  qo'shildi.
 
 ### O'zgardi
 
