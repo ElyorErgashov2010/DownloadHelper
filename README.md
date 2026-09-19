@@ -335,4 +335,6 @@ Downloader/
 - Loyiha kodi: [MIT License](LICENSE)
 - O'zgarishlar tarixi: [CHANGELOG.md](CHANGELOG.md)
 - Fikr, xato va hissa qo'shish: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Xulq-atvor qoidalari: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- Xavfsizlik siyosati: [SECURITY.md](SECURITY.md)
 - Release ZIP ichidagi mustaqil vositalar: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
