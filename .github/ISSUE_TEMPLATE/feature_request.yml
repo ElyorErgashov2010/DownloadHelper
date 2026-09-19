@@ -1,0 +1,37 @@
+name: Taklif yoki yangi funksiya
+description: DownloadHelper uchun haqiqiy foydalanuvchi taklifini yuborish
+title: "[Taklif]: "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Taklif uchun rahmat. Muammoni va kerakli natijani iloji boricha sodda yozing.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Qaysi muammoni hal qilmoqchisiz?
+      placeholder: Hozir nima qiyin yoki noqulay?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Qanday natija kutasiz?
+      placeholder: Funksiya qanday ishlashi kerak?
+    validations:
+      required: true
+  - type: textarea
+    id: alternative
+    attributes:
+      label: Muqobil usul (ixtiyoriy)
+      placeholder: Hozir bu ishni qanday bajaryapsiz?
+    validations:
+      required: false
+  - type: textarea
+    id: mockup
+    attributes:
+      label: Screenshot yoki interfeys namunasi (ixtiyoriy)
+      description: Shaxsiy/maxfiy ma'lumotlarni yashiring.
+    validations:
+      required: false
