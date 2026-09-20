@@ -33,6 +33,14 @@ saqlanadi.
 - Code of Conduct, Security Policy, Issue template va Pull Request template
   qo'shildi.
 
+### Tuzatildi
+
+- Windows 11 va README screenshotidagi farqni kamaytirish uchun dastur Fusion
+  style va izchil dark palette bilan ishga tushadi; progress bar hamda retry
+  spinbox endi barcha tizimlarda aniqroq ko'rinadi. (#4)
+- Kichik oyna scroll'i uchun kerakli 18 px kenglik saqlanadi va ▲/▼ tugmalari
+  bosib turilganda auto-repeat bilan davomli harakat qiladi. (#5)
+
 ### O'zgardi
 
 - GUI bog'liqligi PyQt6 o'rniga `PySide6-Essentials`ga o'tkazildi.

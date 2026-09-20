@@ -201,6 +201,7 @@ class MainWindow(QMainWindow):
         self._retry_spin = QSpinBox()
         self._retry_spin.setRange(0, 10)
         self._retry_spin.setValue(2)
+        self._retry_spin.setMinimumHeight(28)
         self._retry_spin.setToolTip("Yuklashda xato bo'lsa qayta urinishlar soni")
         ctrl_row.addWidget(self._retry_spin)
 

@@ -20,6 +20,7 @@ class ProgressPanel(QWidget):
         self._progress_bar.setRange(0, 100)
         self._progress_bar.setValue(0)
         self._progress_bar.setTextVisible(True)
+        self._progress_bar.setMinimumHeight(20)
         bar_row.addWidget(self._progress_bar, 1)
         self._status_label = QLabel("")
         bar_row.addWidget(self._status_label)

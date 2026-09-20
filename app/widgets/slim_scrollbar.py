@@ -1,8 +1,8 @@
 """Yangi vazifa varag'i uchun ingichka, hover'da kengayadigan scroll bar."""
 
-from PySide6.QtCore import Property, QPropertyAnimation, QEasingCurve, QRect, Qt
+from PySide6.QtCore import Property, QPropertyAnimation, QEasingCurve, QRect, QSize, Qt
 from PySide6.QtGui import QColor, QPainter, QPen, QPolygon
-from PySide6.QtWidgets import QScrollBar
+from PySide6.QtWidgets import QAbstractSlider, QScrollBar
 
 
 class SlimVerticalScrollBar(QScrollBar):
@@ -34,6 +34,11 @@ class SlimVerticalScrollBar(QScrollBar):
         self.update()
 
     handleWidth = Property(float, _get_handle_width, _set_handle_width)
+
+    def sizeHint(self) -> QSize:
+        """QScrollArea 18 px kenglik ajratishi uchun haqiqiy size hint."""
+        hint = super().sizeHint()
+        return QSize(18, hint.height())
 
     def _animate_handle(self, target: float):
         self._hover_animation.stop()
@@ -130,9 +135,19 @@ class SlimVerticalScrollBar(QScrollBar):
         pos = event.position().toPoint()
         handle = self._handle_rect()
         if pos.y() < self._ARROW_HEIGHT:
-            self.setValue(max(self.minimum(), self.value() - self.singleStep()))
+            self.triggerAction(QAbstractSlider.SliderAction.SliderSingleStepSub)
+            self.setRepeatAction(
+                QAbstractSlider.SliderAction.SliderSingleStepSub,
+                400,
+                50,
+            )
         elif pos.y() >= self.height() - self._ARROW_HEIGHT:
-            self.setValue(min(self.maximum(), self.value() + self.singleStep()))
+            self.triggerAction(QAbstractSlider.SliderAction.SliderSingleStepAdd)
+            self.setRepeatAction(
+                QAbstractSlider.SliderAction.SliderSingleStepAdd,
+                400,
+                50,
+            )
         elif handle.contains(pos):
             self._dragging = True
             self._drag_offset = pos.y() - handle.top()
@@ -159,6 +174,8 @@ class SlimVerticalScrollBar(QScrollBar):
         event.accept()
 
     def mouseReleaseEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.setRepeatAction(QAbstractSlider.SliderAction.SliderNoAction)
         if self._dragging and event.button() == Qt.MouseButton.LeftButton:
             self._dragging = False
             self._animate_handle(
