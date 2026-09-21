@@ -4,6 +4,8 @@ from PySide6.QtCore import QPoint, Qt
 from PySide6.QtGui import QColor, QFont, QPainter, QPen, QTextCursor
 from PySide6.QtWidgets import QPlainTextEdit, QWidget
 
+from app.widgets.slim_scrollbar import SlimVerticalScrollBar
+
 
 class _LogResizeHandle(QWidget):
     """Logning pastki o'ng burchagidagi tortib kattalashtirish tutqichi."""
@@ -65,6 +67,10 @@ class LogPanel(QPlainTextEdit):
         self.setFont(QFont("Consolas", 9))
         self.setMaximumBlockCount(5000)
         self.setMinimumHeight(self._MIN_USER_HEIGHT)
+        self.setVerticalScrollBar(
+            SlimVerticalScrollBar(framed_on_hover=True, extent=18)
+        )
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self._last_progress_text = ""
         self._resize_handle = _LogResizeHandle(self) if resizable else None
         if self._resize_handle:

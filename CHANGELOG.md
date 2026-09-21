@@ -25,6 +25,12 @@ saqlanadi.
   vertikal scroll qo'shildi; Buyruq maydoni endi siqilib yo'qolib ketmaydi.
 - Loglar maydonining pastki o'ng burchagiga tortib balandligini o'zgartirish
   tutqichi qo'shildi.
+- Radio va checkbox indikatorlari eski dizaynga o'xshash, barcha tizimlarda
+  izchil ko'rinishga o'tkazildi.
+- Umumiy scroll ramkasiz, ichki Buyruq/Navbat/Log scrolllari esa hover'da
+  nozik ramka bilan ko'rinadigan bo'ldi.
+- Katta yordam tugmasi ramkali qilindi va F1 klaviatura tugmasi umumiy yordamni
+  ochadigan bo'ldi.
 - README'ga interfeys screenshotsi, qisqa boshlash bo'limi va fikr bildirish
   yo'li qo'shildi.
 - `CONTRIBUTING.md` orqali xato va taklif yuborish tartibi qo'shildi.

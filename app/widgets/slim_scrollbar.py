@@ -1,21 +1,23 @@
-"""Yangi vazifa varag'i uchun ingichka, hover'da kengayadigan scroll bar."""
+"""Ingichka, hover'da kengayadigan va uchburchakli vertikal scroll bar."""
 
-from PySide6.QtCore import Property, QPropertyAnimation, QEasingCurve, QRect, QSize, Qt
+from PySide6.QtCore import Property, QPropertyAnimation, QEasingCurve, QPoint, QRect, QSize, Qt
 from PySide6.QtGui import QColor, QPainter, QPen, QPolygon
 from PySide6.QtWidgets import QAbstractSlider, QScrollBar
 
 
 class SlimVerticalScrollBar(QScrollBar):
-    """Yuqori/pastki uchburchakli va hover'da kengayadigan vertikal scroll bar."""
+    """Ramkasiz yoki hover'da ramkali ishlashi mumkin bo'lgan custom scroll bar."""
 
     _ARROW_HEIGHT = 18
     _NORMAL_HANDLE_WIDTH = 5.0
     _HOVER_HANDLE_WIDTH = 12.0
     _MIN_HANDLE_HEIGHT = 28
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, *, framed_on_hover: bool = False, extent: int = 18):
         super().__init__(Qt.Orientation.Vertical, parent)
-        self.setFixedWidth(18)
+        self._extent = extent
+        self._framed_on_hover = framed_on_hover
+        self.setFixedWidth(extent)
         self.setMouseTracking(True)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
@@ -36,9 +38,13 @@ class SlimVerticalScrollBar(QScrollBar):
     handleWidth = Property(float, _get_handle_width, _set_handle_width)
 
     def sizeHint(self) -> QSize:
-        """QScrollArea 18 px kenglik ajratishi uchun haqiqiy size hint."""
+        """QScrollArea/QTextEdit custom kenglik uchun yetarli joy ajratadi."""
         hint = super().sizeHint()
-        return QSize(18, hint.height())
+        return QSize(self._extent, hint.height())
+
+    def minimumSizeHint(self) -> QSize:
+        hint = super().minimumSizeHint()
+        return QSize(self._extent, hint.height())
 
     def _animate_handle(self, target: float):
         self._hover_animation.stop()
@@ -56,7 +62,7 @@ class SlimVerticalScrollBar(QScrollBar):
         value_range = self.maximum() - self.minimum()
         if value_range <= 0:
             handle_height = groove.height()
-            ratio = 0.0
+            y = groove.top()
         else:
             page = max(1, self.pageStep())
             handle_height = max(
@@ -68,55 +74,56 @@ class SlimVerticalScrollBar(QScrollBar):
             ratio = (self.value() - self.minimum()) / value_range
             ratio = max(0.0, min(1.0, ratio))
             y = groove.top() + round(usable_height * ratio)
-            width = max(3, round(self._handle_width))
-            return QRect((self.width() - width) // 2, y, width, handle_height)
 
         width = max(3, round(self._handle_width))
-        return QRect((self.width() - width) // 2, groove.top(), width, handle_height)
+        return QRect((self.width() - width) // 2, y, width, handle_height)
 
     def paintEvent(self, _event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
+        hovered = self.underMouse() or self._dragging
         center_x = self.width() // 2
         groove = self._groove_rect()
         handle = self._handle_rect()
 
-        # Ingichka yo'l (track).
-        track_color = QColor("#4f4f4f") if self.underMouse() else QColor("#3d3d3d")
+        # Ichki QTextEdit/Log/Navbat scroll'larida ramka faqat hover bo'lganda chiqadi.
+        if self._framed_on_hover and hovered:
+            frame = self.rect().adjusted(1, 1, -2, -2)
+            painter.setPen(QPen(QColor("#777777"), 1))
+            painter.setBrush(QColor("#2a2a2a"))
+            painter.drawRoundedRect(frame, 4, 4)
+
+        # Ingichka yo'l (track). Umumiy katta scroll doim ramkasiz qoladi.
+        track_color = QColor("#5a5a5a") if hovered else QColor("#3d3d3d")
         painter.setPen(QPen(track_color, 2))
         painter.drawLine(center_x, groove.top(), center_x, groove.bottom())
 
-        # Har doim ko'rinib turadigan yuqori va pastki uchburchaklar.
-        arrow_color = QColor("#c0c0c0") if self.underMouse() else QColor("#8f8f8f")
+        # Yuqori va pastki uchburchaklar.
+        arrow_color = QColor("#d0d0d0") if hovered else QColor("#929292")
         painter.setPen(Qt.PenStyle.NoPen)
         painter.setBrush(arrow_color)
         painter.drawPolygon(QPolygon([
-            self._point(center_x, 4),
-            self._point(center_x - 5, 12),
-            self._point(center_x + 5, 12),
+            QPoint(center_x, 4),
+            QPoint(center_x - 5, 12),
+            QPoint(center_x + 5, 12),
         ]))
         bottom = self.height()
         painter.drawPolygon(QPolygon([
-            self._point(center_x, bottom - 4),
-            self._point(center_x - 5, bottom - 12),
-            self._point(center_x + 5, bottom - 12),
+            QPoint(center_x, bottom - 4),
+            QPoint(center_x - 5, bottom - 12),
+            QPoint(center_x + 5, bottom - 12),
         ]))
 
-        # Qimirlaydigan tutqich (handle).
+        # Hover'da kattalashadigan tutqich.
         if self._dragging:
             handle_color = QColor("#55b7ef")
-        elif self.underMouse():
-            handle_color = QColor("#a9a9a9")
+        elif hovered:
+            handle_color = QColor("#aaaaaa")
         else:
             handle_color = QColor("#777777")
         painter.setBrush(handle_color)
         painter.drawRoundedRect(handle, handle.width() / 2, handle.width() / 2)
-
-    @staticmethod
-    def _point(x: int, y: int):
-        from PySide6.QtCore import QPoint
-        return QPoint(x, y)
 
     def enterEvent(self, event):
         self._animate_handle(self._HOVER_HANDLE_WIDTH)
@@ -136,18 +143,10 @@ class SlimVerticalScrollBar(QScrollBar):
         handle = self._handle_rect()
         if pos.y() < self._ARROW_HEIGHT:
             self.triggerAction(QAbstractSlider.SliderAction.SliderSingleStepSub)
-            self.setRepeatAction(
-                QAbstractSlider.SliderAction.SliderSingleStepSub,
-                400,
-                50,
-            )
+            self.setRepeatAction(QAbstractSlider.SliderAction.SliderSingleStepSub, 400, 50)
         elif pos.y() >= self.height() - self._ARROW_HEIGHT:
             self.triggerAction(QAbstractSlider.SliderAction.SliderSingleStepAdd)
-            self.setRepeatAction(
-                QAbstractSlider.SliderAction.SliderSingleStepAdd,
-                400,
-                50,
-            )
+            self.setRepeatAction(QAbstractSlider.SliderAction.SliderSingleStepAdd, 400, 50)
         elif handle.contains(pos):
             self._dragging = True
             self._drag_offset = pos.y() - handle.top()

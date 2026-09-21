@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (
     QListWidgetItem, QCheckBox, QApplication, QFrame, QScrollArea, QLayout,
 )
 from PySide6.QtCore import QSize, Qt, QTimer, QUrl
-from PySide6.QtGui import QDesktopServices
+from PySide6.QtGui import QDesktopServices, QKeySequence, QShortcut
 
 from app.core.command_parser import parse_command, ParsedCommand
 from app.core.normalizer import normalize_filename
@@ -98,8 +98,11 @@ class MainWindow(QMainWindow):
 
         auto_help_btn = QPushButton("?")
         auto_help_btn.setFixedSize(22, 22)
+        auto_help_btn.setToolTip("Avto-rejim yordami")
         auto_help_btn.setStyleSheet(
-            "QPushButton { font-weight: bold; font-size: 11px; border-radius: 11px; }"
+            "QPushButton { font-weight: bold; font-size: 11px; border-radius: 11px; "
+            "border: 1px solid #777777; background: #353535; }"
+            "QPushButton:hover { border-color: #21a8f3; background: #454545; }"
         )
         auto_help_btn.clicked.connect(self._on_auto_help)
         top_row.addWidget(auto_help_btn)
@@ -107,12 +110,17 @@ class MainWindow(QMainWindow):
         top_row.addStretch()
         help_btn = QPushButton("?")
         help_btn.setFixedSize(28, 28)
-        help_btn.setToolTip("Yordam")
+        help_btn.setToolTip("Yordam (F1)")
         help_btn.setStyleSheet(
-            "QPushButton { font-weight: bold; font-size: 14px; border-radius: 14px; }"
+            "QPushButton { font-weight: bold; font-size: 14px; border-radius: 14px; "
+            "border: 1px solid #777777; background: #353535; }"
+            "QPushButton:hover { border-color: #21a8f3; background: #454545; }"
         )
         help_btn.clicked.connect(self._on_help)
         top_row.addWidget(help_btn)
+        self._help_shortcut = QShortcut(QKeySequence(Qt.Key.Key_F1), self)
+        self._help_shortcut.setContext(Qt.ShortcutContext.WindowShortcut)
+        self._help_shortcut.activated.connect(self._on_help)
         central_layout.addLayout(top_row)
 
         # Almashinuv buferi faqat «Joylash» tugmasi bosilganda ishlatiladi.
@@ -165,13 +173,10 @@ class MainWindow(QMainWindow):
         self._cmd_input.auto_parse_requested.connect(self._on_parse)
         layout.addWidget(self._cmd_input)
 
-        # Yordamchi executable fayllarning holati — yuklashdan oldin ham ko'rinadi.
-        self._tools_status_box = QFrame()
-        self._tools_status_box.setStyleSheet(
-            "QFrame { border: 1px solid #666666; border-radius: 5px; padding: 2px; }"
-        )
+        # Yordamchi executable fayllarning holati — tashqi katta ramkasiz.
+        self._tools_status_box = QWidget()
         tools_layout = QHBoxLayout(self._tools_status_box)
-        tools_layout.setContentsMargins(8, 4, 8, 4)
+        tools_layout.setContentsMargins(0, 2, 0, 2)
         tools_title = QLabel("Vositalar holati:")
         tools_title.setStyleSheet("font-weight: bold;")
         tools_layout.addWidget(tools_title)
@@ -263,6 +268,10 @@ class MainWindow(QMainWindow):
 
         self._queue_list = QListWidget()
         self._queue_list.setMaximumHeight(120)
+        self._queue_list.setVerticalScrollBar(
+            SlimVerticalScrollBar(framed_on_hover=True, extent=18)
+        )
+        self._queue_list.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self._queue_list.setVisible(False)
         self._queue_list.setSelectionMode(QListWidget.SelectionMode.ExtendedSelection)
         layout.addWidget(self._queue_list)
@@ -299,6 +308,10 @@ class MainWindow(QMainWindow):
 
         self._s3_fail_list = QListWidget()
         self._s3_fail_list.setMaximumHeight(120)
+        self._s3_fail_list.setVerticalScrollBar(
+            SlimVerticalScrollBar(framed_on_hover=True, extent=18)
+        )
+        self._s3_fail_list.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self._s3_fail_list.setVisible(False)
         self._s3_fail_list.setSelectionMode(QListWidget.SelectionMode.ExtendedSelection)
         self._s3_fail_list.setStyleSheet(

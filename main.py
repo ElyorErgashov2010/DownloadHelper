@@ -16,10 +16,12 @@ def main():
     from PySide6.QtWidgets import QApplication
 
     from app.main_window import MainWindow
+    from app.widgets.selection_indicator_style import SelectionIndicatorStyle
 
     app = QApplication(sys.argv)
-    # Fusion style barcha tizimlarda progress bar va spinbox'ni izchil chizadi.
-    app.setStyle("Fusion")
+    # Fusion style progress/spinbox'ni izchil chizadi, custom proxy esa eski
+    # dizaynga o'xshash radio va checkbox indikatorlarini saqlaydi.
+    app.setStyle(SelectionIndicatorStyle("Fusion"))
     palette = QPalette()
     palette.setColor(QPalette.ColorRole.Window, QColor("#252525"))
     palette.setColor(QPalette.ColorRole.WindowText, QColor("#f0f0f0"))

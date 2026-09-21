@@ -133,13 +133,20 @@ Joy yetarli bo'lmasa, vazifa o'tkazib yuboriladi.</p>
 <h3>Kichik oynada ishlash</h3>
 
 <p>Oyna kichraytirilsa, <b>«Yangi vazifa»</b> varag'ining o'ng tomonida
-vertikal scroll paydo bo'ladi. Ingichka tutqich ustiga sichqoncha olib
-borilganda kengayadi. Yuqori va pastki uchburchaklar bir qadam siljitadi,
-tutqichni tortib esa kerakli joyga tez o'tish mumkin.</p>
+ramkasiz vertikal scroll paydo bo'ladi. Ingichka tutqich ustiga sichqoncha olib
+borilganda kengayadi. Yuqori va pastki uchburchaklar bir qadam siljitadi;
+ularni bosib tursangiz scroll davomli yuradi.</p>
+
+<p>Buyruq, Navbat va Loglar ichidagi scrolllar oddiy holatda ramkasiz bo'ladi.
+Sichqoncha ularning ustiga borganda nozik ramka paydo bo'ladi.</p>
 
 <p><b>Loglar</b> maydonining pastki o'ng burchagida diagonal kattalashtirish
 belgisi bor. Uni tortib log balandligini kattalashtirish yoki kichraytirish
 mumkin.</p>
+
+<p><b>Yordam:</b> katta <b>«?»</b> tugmasi yoki klaviaturadagi <b>F1</b>
+umumiy yordam oynasini ochadi. Avto-rejim yonidagi kichik <b>«?»</b> faqat
+Avto-rejim yordamiga tegishli.</p>
 
 <hr>
 
