@@ -21,14 +21,14 @@ saqlanadi.
   ochadi.
 - **«Formani tozalash»** tugmasi buyruq, nom, progress va loglarni yangi vazifa
   uchun tozalaydi.
-- Kichik oyna uchun yuqori/pastki uchburchakli, hover'da kengayadigan ingichka
+- Kichik oyna uchun Windows Explorer uslubidagi, hover'da kengayadigan ramkasiz
   vertikal scroll qo'shildi; Buyruq maydoni endi siqilib yo'qolib ketmaydi.
 - Loglar maydonining pastki o'ng burchagiga tortib balandligini o'zgartirish
   tutqichi qo'shildi.
-- Radio va checkbox indikatorlari eski dizaynga o'xshash, barcha tizimlarda
-  izchil ko'rinishga o'tkazildi.
-- Umumiy scroll ramkasiz, ichki Buyruq/Navbat/Log scrolllari esa hover'da
-  nozik ramka bilan ko'rinadigan bo'ldi.
+- Radio, checkbox va boshqa standart input elementlari Windows native dizayniga
+  qaytarildi.
+- Umumiy hamda Buyruq/Navbat/Log ichki scrolllari Explorer uslubidagi ramkasiz,
+  hover'da kengayadigan ko'rinishga o'tkazildi.
 - Katta yordam tugmasi ramkali qilindi va F1 klaviatura tugmasi umumiy yordamni
   ochadigan bo'ldi.
 - README'ga interfeys screenshotsi, qisqa boshlash bo'limi va fikr bildirish
@@ -41,11 +41,10 @@ saqlanadi.
 
 ### Tuzatildi
 
-- Windows 11 va README screenshotidagi farqni kamaytirish uchun dastur Fusion
-  style va izchil dark palette bilan ishga tushadi; progress bar hamda retry
-  spinbox endi barcha tizimlarda aniqroq ko'rinadi. (#4)
-- Kichik oyna scroll'i uchun kerakli 18 px kenglik saqlanadi va ▲/▼ tugmalari
-  bosib turilganda auto-repeat bilan davomli harakat qiladi. (#5)
+- README'dagi namuna interfeys rasmi vaqtincha olib tashlandi; beta testdan
+  keyin haqiqiy Windows screenshot bilan almashtiriladi. (#4)
+- Kichik oyna scroll'i uchun to'g'ri kenglik saqlanadi; hover holatida o'ng
+  tomondan kesilib qolmaydi. (#5)
 
 ### O'zgardi
 

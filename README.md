@@ -17,7 +17,9 @@ Foydalanuvchi Telegram-botdan ishga tushirish buyrug'ini nusxalaydi, dasturga qo
 
 ## Interfeys
 
-![DownloadHelper asosiy oynasi: Buyruqni tahlil qilish, Joylash, Navbat va yuklash boshqaruvlari](docs/images/downloadhelper-interface.png)
+DownloadHelper Windows'ning joriy light/dark dizayniga mos ishlaydi. Beta test
+davomida tekshirilgan haqiqiy Windows screenshotsi keyingi stable release bilan
+qo'shiladi.
 
 ---
 
@@ -46,13 +48,11 @@ Hammasi bir papkada bo'lishi kerak.
 
 ### Kichik oynada ishlash
 
-- Oyna kichraytirilsa, **Yangi vazifa** varag'ining o'ng tomonida ingichka,
-  ramkasiz vertikal scroll paydo bo'ladi. Ustiga sichqoncha olib borilganda
-  tutqichi kengayadi.
-- Scrollning yuqori va pastki uchburchaklari orqali bitta qadam yuqoriga yoki
-  pastga siljish mumkin; uchburchakni bosib tursangiz scroll davomli yuradi.
-- Buyruq, Navbat va Loglar ichidagi scrolllar oddiy holatda ramkasiz; ustiga
-  sichqoncha borganda ularning nozik ramkasi ko'rinadi.
+- Oyna kichraytirilsa, **Yangi vazifa** varag'ining o'ng tomonida Windows
+  Explorer uslubidagi ingichka, ramkasiz vertikal scroll paydo bo'ladi.
+- Sichqoncha scroll ustiga borganda tutqich kengayadi va nozik fon yo'li
+  ko'rinadi; sichqoncha olinganda yana ixcham holatga qaytadi.
+- Buyruq, Navbat va Loglar ichidagi scrolllar ham shu Explorer uslubida ishlaydi.
 - **Loglar** maydonining pastki o'ng burchagidagi diagonal belgi orqali log
   balandligini kattalashtirish yoki kichraytirish mumkin.
 

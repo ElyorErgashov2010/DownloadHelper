@@ -133,12 +133,11 @@ Joy yetarli bo'lmasa, vazifa o'tkazib yuboriladi.</p>
 <h3>Kichik oynada ishlash</h3>
 
 <p>Oyna kichraytirilsa, <b>«Yangi vazifa»</b> varag'ining o'ng tomonida
-ramkasiz vertikal scroll paydo bo'ladi. Ingichka tutqich ustiga sichqoncha olib
-borilganda kengayadi. Yuqori va pastki uchburchaklar bir qadam siljitadi;
-ularni bosib tursangiz scroll davomli yuradi.</p>
+Windows Explorer uslubidagi ingichka, ramkasiz vertikal scroll paydo bo'ladi.
+Sichqoncha uning ustiga borganda tutqich kengayadi va nozik fon yo'li ko'rinadi.</p>
 
-<p>Buyruq, Navbat va Loglar ichidagi scrolllar oddiy holatda ramkasiz bo'ladi.
-Sichqoncha ularning ustiga borganda nozik ramka paydo bo'ladi.</p>
+<p>Buyruq, Navbat va Loglar ichidagi scrolllar ham shu Explorer uslubida
+ishlaydi: oddiy holatda ixcham, hover'da kengroq ko'rinadi.</p>
 
 <p><b>Loglar</b> maydonining pastki o'ng burchagida diagonal kattalashtirish
 belgisi bor. Uni tortib log balandligini kattalashtirish yoki kichraytirish

@@ -178,11 +178,17 @@ class MainWindow(QMainWindow):
         tools_layout = QHBoxLayout(self._tools_status_box)
         tools_layout.setContentsMargins(0, 2, 0, 2)
         tools_title = QLabel("Vositalar holati:")
-        tools_title.setStyleSheet("font-weight: bold;")
+        tools_title.setStyleSheet(
+            "font-weight: bold; border: 1px solid #666666; border-radius: 5px; "
+            "padding: 5px 8px;"
+        )
         tools_layout.addWidget(tools_title)
         self._tools_status_label = QLabel()
         self._tools_status_label.setWordWrap(True)
         self._tools_status_label.setTextFormat(Qt.TextFormat.RichText)
+        self._tools_status_label.setStyleSheet(
+            "border: 1px solid #666666; border-radius: 5px; padding: 5px 8px;"
+        )
         tools_layout.addWidget(self._tools_status_label, 1)
         self._tools_status_refresh_btn = QPushButton("Qayta tekshirish")
         self._tools_status_refresh_btn.setToolTip("Yordamchi vositalar holatini qayta tekshirish")
@@ -206,7 +212,6 @@ class MainWindow(QMainWindow):
         self._retry_spin = QSpinBox()
         self._retry_spin.setRange(0, 10)
         self._retry_spin.setValue(2)
-        self._retry_spin.setMinimumHeight(28)
         self._retry_spin.setToolTip("Yuklashda xato bo'lsa qayta urinishlar soni")
         ctrl_row.addWidget(self._retry_spin)
 
