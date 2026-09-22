@@ -11,7 +11,7 @@ def main():
         from app.cli_runner import run_cli
         sys.exit(run_cli(argv))
 
-    # Oddiy GUI rejim
+    # Oddiy GUI rejim. Windows o'zining native light/dark dizaynini ishlatadi.
     from PySide6.QtWidgets import QApplication
 
     from app.main_window import MainWindow

@@ -9,6 +9,8 @@ permissions:
 jobs:
   build-test-exe:
     runs-on: windows-latest
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
 
     steps:
       - name: Checkout source code
@@ -38,7 +40,24 @@ jobs:
       - name: Download N_m3u8DL-RE
         shell: pwsh
         run: |
-          $release = Invoke-RestMethod -Uri "https://api.github.com/repos/nilaoda/N_m3u8DL-RE/releases/latest"
+          $headers = @{
+            "Accept" = "application/vnd.github+json"
+            "Authorization" = "Bearer $env:GITHUB_TOKEN"
+            "X-GitHub-Api-Version" = "2022-11-28"
+          }
+          $release = $null
+          for ($attempt = 1; $attempt -le 3; $attempt++) {
+            try {
+              $release = Invoke-RestMethod `
+                -Uri "https://api.github.com/repos/nilaoda/N_m3u8DL-RE/releases/latest" `
+                -Headers $headers `
+                -ErrorAction Stop
+              break
+            } catch {
+              if ($attempt -eq 3) { throw }
+              Start-Sleep -Seconds (5 * $attempt)
+            }
+          }
           $asset = $release.assets | Where-Object {
             $_.name -match 'win-x64' -and $_.name -match '\.zip$'
           } | Select-Object -First 1
@@ -53,7 +72,24 @@ jobs:
       - name: Download FFmpeg
         shell: pwsh
         run: |
-          $release = Invoke-RestMethod -Uri "https://api.github.com/repos/BtbN/FFmpeg-Builds/releases/latest"
+          $headers = @{
+            "Accept" = "application/vnd.github+json"
+            "Authorization" = "Bearer $env:GITHUB_TOKEN"
+            "X-GitHub-Api-Version" = "2022-11-28"
+          }
+          $release = $null
+          for ($attempt = 1; $attempt -le 3; $attempt++) {
+            try {
+              $release = Invoke-RestMethod `
+                -Uri "https://api.github.com/repos/BtbN/FFmpeg-Builds/releases/latest" `
+                -Headers $headers `
+                -ErrorAction Stop
+              break
+            } catch {
+              if ($attempt -eq 3) { throw }
+              Start-Sleep -Seconds (5 * $attempt)
+            }
+          }
           $asset = $release.assets | Where-Object {
             $_.name -match 'win64-gpl\.zip$' -and $_.name -notmatch 'shared'
           } | Select-Object -First 1

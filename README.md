@@ -17,7 +17,9 @@ Foydalanuvchi Telegram-botdan ishga tushirish buyrug'ini nusxalaydi, dasturga qo
 
 ## Interfeys
 
-![DownloadHelper asosiy oynasi: Buyruqni tahlil qilish, Joylash, Navbat va yuklash boshqaruvlari](docs/images/downloadhelper-interface.png)
+DownloadHelper Windows'ning joriy light/dark dizayniga mos ishlaydi. Beta test
+davomida tekshirilgan haqiqiy Windows screenshotsi keyingi stable release bilan
+qo'shiladi.
 
 ---
 
@@ -40,19 +42,25 @@ Hammasi bir papkada bo'lishi kerak.
 2. To'rtta `.exe` fayl bir papkada turganini tekshiring.
 3. `DownloadHelper.exe`ni oching va **Vositalar holati** panelida uchala vosita
    `Tayyor` ekanini tekshiring.
-4. Telegram bot qaytargan N_m3u8DL-RE buyrug'ini nusxalang va **«Joylash»** ni bosing.
-5. Saqlash joyini tanlang, so'ng **«Yuklab olish»** ni bosing.
+4. Telegram bot qaytargan N_m3u8DL-RE buyrug'ini nusxalang va **«Joylash»**ni bosing.
+5. Saqlash joyini tanlang, so'ng **«Yuklab olish»**ni bosing.
 6. Yuklash tugagach **«Papka ochish»** orqali tayyor fayl joylashgan papkani oching.
 
 ### Kichik oynada ishlash
 
-- Oyna kichraytirilsa, **Yangi vazifa** varag'ining o'ng tomonida ingichka
-  vertikal scroll paydo bo'ladi. Ustiga sichqoncha olib borilganda tutqichi
-  kengayadi.
-- Scrollning yuqori va pastki uchburchaklari orqali bitta qadam yuqoriga yoki
-  pastga siljish mumkin; tutqichni tortib istalgan qismga o'ting.
+- Oyna kichraytirilsa, **Yangi vazifa** varag'ining o'ng tomonida Windows
+  Explorer uslubidagi ingichka, ramkasiz vertikal scroll paydo bo'ladi.
+- Sichqoncha scroll ustiga borganda tutqich kengayadi va nozik fon yo'li
+  ko'rinadi; sichqoncha olinganda yana ixcham holatga qaytadi.
+- Buyruq, Navbat va Loglar ichidagi scrolllar ham shu Explorer uslubida ishlaydi.
 - **Loglar** maydonining pastki o'ng burchagidagi diagonal belgi orqali log
   balandligini kattalashtirish yoki kichraytirish mumkin.
+
+### Yordam tugmalari
+
+- Oynadagi katta **?** tugmasi umumiy yordam oynasini ochadi.
+- Klaviaturadagi **F1** ham aynan shu umumiy yordam oynasini ochadi.
+- Avto-rejim yonidagi kichik **?** tugmasi faqat Avto-rejim haqida yordam beradi.
 
 ### Windows imzosi va xavfsizlik
 

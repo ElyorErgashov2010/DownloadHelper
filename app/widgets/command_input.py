@@ -1,7 +1,9 @@
 """Buyruq kiritish vidjeti: «Joylash» orqali qo'yilgan buyruqni tahlil qiladi."""
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Signal, Qt
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QTextEdit, QVBoxLayout, QWidget
+
+from app.widgets.slim_scrollbar import SlimVerticalScrollBar
 
 
 class _PasteAwareTextEdit(QTextEdit):
@@ -39,6 +41,10 @@ class CommandInput(QWidget):
         self.text_edit.setPlaceholderText("N_m3u8DL-RE buyrug'ini shu yerga qo'ying...")
         # Kichik oynada buyruq maydoni yo'qolib ketmasligi uchun doimiy balandlik.
         self.text_edit.setFixedHeight(100)
+        self.text_edit.setVerticalScrollBar(
+            SlimVerticalScrollBar(framed_on_hover=True, extent=18)
+        )
+        self.text_edit.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.text_edit.pasted.connect(self._on_pasted)
         layout.addWidget(self.text_edit)
 
