@@ -1,8 +1,10 @@
-"""Yuklab olish jarayoni paneli: progress-bar, tezlik va qolgan vaqt."""
+"""Yuklab olish jarayoni paneli: to'lqinli progress-bar, tezlik va qolgan vaqt."""
 
 import re
 
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QProgressBar, QLabel
+from PySide6.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout, QWidget
+
+from app.widgets.wave_progress_bar import WaveProgressBar
 
 
 # N_m3u8DL-RE oqim prefikslari (video > audio > subtitr bo'yicha muhim)
@@ -13,21 +15,19 @@ class ProgressPanel(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(0, 2, 0, 2)
 
-        bar_row = QHBoxLayout()
-        self._progress_bar = QProgressBar()
-        self._progress_bar.setRange(0, 100)
-        self._progress_bar.setValue(0)
-        self._progress_bar.setTextVisible(True)
-        bar_row.addWidget(self._progress_bar, 1)
+        self._progress_bar = WaveProgressBar(show_percent=True)
+        layout.addWidget(self._progress_bar)
+
+        info_row = QHBoxLayout()
         self._status_label = QLabel("")
-        bar_row.addWidget(self._status_label)
-
+        info_row.addWidget(self._status_label)
         self._info_label = QLabel("")
-        self._info_label.setStyleSheet("color: gray; font-size: 11px;")
-        layout.addLayout(bar_row)
-        layout.addWidget(self._info_label)
+        self._info_label.setStyleSheet("color: #9a9a9a; font-size: 11px;")
+        info_row.addWidget(self._info_label)
+        info_row.addStretch()
+        layout.addLayout(info_row)
 
         # Har bir oqimning jarayoni: {"vid": 45, "aud": 80, "sub": 0}
         self._stream_progress: dict[str, int] = {}
@@ -90,6 +90,8 @@ class ProgressPanel(QWidget):
 
         if info_parts:
             self._info_label.setText("  |  ".join(info_parts))
+        elif not pct_match:
+            self._status_label.setText(text.strip())
 
     def _get_primary_progress(self) -> int:
         """Faol oqimning (hali 100% bo'lmagan) jarayonini qaytaradi.

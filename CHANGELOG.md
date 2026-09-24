@@ -41,6 +41,15 @@ saqlanadi.
 
 ### Tuzatildi
 
+- Progress paneli endi Windows 7 Explorer uslubidagi to'lqinli barga almashtirildi:
+  **«0%»** matni bar markazida turadi, foiz o'tayotganda yashil to'lqin jonli
+  harakatlanadi va foiz yozuvi to'lqin ustidan chiqib turadi. (#4)
+- **«?»** yordam tugmalari endi to'rtburchak (ramkali, tekis burchakli);
+  **«Qayta tekshirish»** hamda barcha tugmalar bir xil izchil uslubda. (#4)
+- **«Xato bo'lsa qayta urinishlar»** spinbox'ida aniq ko'rinadigan ▲/▼ tugmalar. (#4)
+- Scroll bar endi sichqoncha bormaganda ingichka, borganda kengayadi va ▲▼
+  tugmalar ko'rinadi; ▲▼ ni bosib turilganda scroll auto-repeat bilan
+  to'xtovsiz davom etadi. (#5)
 - README'dagi namuna interfeys rasmi vaqtincha olib tashlandi; beta testdan
   keyin haqiqiy Windows screenshot bilan almashtiriladi. (#4)
 - Kichik oyna scroll'i uchun to'g'ri kenglik saqlanadi; hover holatida o'ng

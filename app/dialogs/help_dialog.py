@@ -134,10 +134,19 @@ Joy yetarli bo'lmasa, vazifa o'tkazib yuboriladi.</p>
 
 <p>Oyna kichraytirilsa, <b>«Yangi vazifa»</b> varag'ining o'ng tomonida
 Windows Explorer uslubidagi ingichka, ramkasiz vertikal scroll paydo bo'ladi.
-Sichqoncha uning ustiga borganda tutqich kengayadi va nozik fon yo'li ko'rinadi.</p>
+Sichqoncha bormaganda tutqich ingichka; borganda kengayadi, nozik fon yo'li va
+yuqori/pastki <b>▲▼</b> tugmalar ko'rinadi. Sichqoncha olinganda yana ixcham
+holatga qaytadi.</p>
+
+<p><b>▲▼</b> tugmalari (va tutqich orasidagi yo'l) ustida bosib turilganda
+scroll to'xtovsiz davom etadi, qo'yib yuborilganda to'xtaydi.</p>
 
 <p>Buyruq, Navbat va Loglar ichidagi scrolllar ham shu Explorer uslubida
 ishlaydi: oddiy holatda ixcham, hover'da kengroq ko'rinadi.</p>
+
+<p><b>Jarayon:</b> yuklash paytida Windows 7 Explorer uslubidagi progress bar
+markazida jonli yashil to'lqin o'tadi va foiz yozuvi uning ustidan chiqib
+turadi.</p>
 
 <p><b>Loglar</b> maydonining pastki o'ng burchagida diagonal kattalashtirish
 belgisi bor. Uni tortib log balandligini kattalashtirish yoki kichraytirish

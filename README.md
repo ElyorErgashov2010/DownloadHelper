@@ -50,8 +50,11 @@ Hammasi bir papkada bo'lishi kerak.
 
 - Oyna kichraytirilsa, **Yangi vazifa** varag'ining o'ng tomonida Windows
   Explorer uslubidagi ingichka, ramkasiz vertikal scroll paydo bo'ladi.
-- Sichqoncha scroll ustiga borganda tutqich kengayadi va nozik fon yo'li
-  ko'rinadi; sichqoncha olinganda yana ixcham holatga qaytadi.
+- Sichqoncha scroll ustiga bormaganda tutqich ingichka bo'lib turadi; borganda
+  kengayadi, nozik fon yo'li ko'rinadi va yuqori/pastki **▲▼** tugmalar chiqadi.
+  Sichqoncha olinganda yana ixcham holatga qaytadi.
+- **▲▼** tugmalari (va yo'l) ustida bosib turilganda scroll to'xtovsiz davom
+  etadi, qo'yib yuborilganda to'xtaydi.
 - Buyruq, Navbat va Loglar ichidagi scrolllar ham shu Explorer uslubida ishlaydi.
 - **Loglar** maydonining pastki o'ng burchagidagi diagonal belgi orqali log
   balandligini kattalashtirish yoki kichraytirish mumkin.
@@ -216,7 +219,8 @@ botiga yuboring. Bot N_m3u8DL-RE uchun tayyor buyruqni qaytaradi.
   berganda avtomatik qayta urinishlar soni
 
 #### Jarayon va loglar
-- Foiz, tezlik va qolgan vaqt ko'rsatilgan progress-bar
+- Windows 7 Explorer uslubidagi progress-bar: bar markazida jonli o'tadigan
+  yashil to'lqin, uning ustida oq foiz yozuvi
 - Bir nechta oqim (video, audio, subtitr) yuklanayotganda hozirgi faol oqimning
   jarayoni ko'rsatiladi
 - N_m3u8DL-RE chiqishi real vaqtda ko'rsatiladigan log paneli
