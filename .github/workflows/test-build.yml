@@ -2,6 +2,10 @@ name: Build test EXE (unsigned)
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - arena/01a0d400-downloadhelper
+      - main
 
 permissions:
   contents: read
