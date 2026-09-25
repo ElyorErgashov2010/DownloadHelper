@@ -33,6 +33,12 @@ def _install_error_log():
     sys.excepthook = _excepthook
 
 
+def _apply_gui_style(app):
+    """Barcha tugmalar uchun yagona izchil qoramtir ko'rinish."""
+    from app.theme import BUTTON_QSS
+    app.setStyleSheet(BUTTON_QSS)
+
+
 def main():
     argv = sys.argv[1:]
 
@@ -50,6 +56,7 @@ def main():
 
     app = QApplication(sys.argv)
     app.setApplicationName("Download Helper")
+    _apply_gui_style(app)
     window = MainWindow()
     window.show()
     # Oyna ba'zan ekran chetida yoki minimallashtirilgan qoladi — bu uni
