@@ -2,38 +2,51 @@
 
 Xulq:
 - Oddiy holatda (sichqoncha bormagan): faqat ingichka tutqich (tayoqcha).
-- Sichqoncha borganda: tutqich kengayadi, fon yo'li ochiladi va ▲/▼ uchburchak tugmalar chiqadi.
-- ▲/▼ ni yoki yo'lni bosib turilganda scroll auto-repeat bilan to'xtovsiz davom etadi.
+- Sichqoncha borganda: tutqich kengayadi, fon yo'li ochiladi va ▲/▼
+  uchburchak tugmalar chiqadi.
+- ▲/▼ ni yoki yo'lni bosib turilganda scroll auto-repeat bilan to'xtovsiz
+  davom etadi, qo'yib yuborilganda to'xtaydi.
+
+Geometriya:
+- Track, tutqich va uchburchaklar widget kengligi bo'yicha MARKAZDA
+  chiziladi — chap qirrada kesilish, o'ngda ortiqcha bo'sh joy qolmaydi.
+- Ramkali (framed) scroll barlar kengroq joy oladi (extent, 18px);
+  oramasiz asosiy scroll bar 12px da qoladi.
 """
 
-from PySide6.QtCore import (
-    Property, QEasingCurve, QPointF, QPropertyAnimation, QRectF, QSize, Qt, QTimer, QEvent
-)
-from PySide6.QtGui import QColor, QPainter, QPolygonF, QPen
+from PySide6.QtCore import QPointF, QRectF, QSize, Qt, QTimer
+from PySide6.QtGui import QColor, QPainter, QPolygonF
 from PySide6.QtWidgets import QScrollBar
 
 
 class SlimVerticalScrollBar(QScrollBar):
-    """Ingichka, hover'da kengayadigan mutloq silliq va qirrasiz vertikal scroll bar."""
+    """Ingichka, hover'da kengayadigan, markazdan chiziladigan vertikal scroll bar."""
 
     _MIN_HANDLE_HEIGHT = 20.0
     _REPEAT_DELAY_MS = 400      # bosish → takrorlash boshlanguncha kutish
     _REPEAT_INTERVAL_MS = 50    # takrorlash oralig'i
 
+    _ARROW_HALF_WIDTH = 4.5     # uchburchak kengligining yarmi
+    _ARROW_HEIGHT = 5.5         # uchburchak balandligi
+
     def __init__(self, parent=None, *, framed_on_hover: bool = False, extent: int = 18):
         super().__init__(Qt.Orientation.Vertical, parent)
         self._extent = extent
         self._framed_on_hover = framed_on_hover
-        
+
         # Grafik asoratlarni oldini olish uchun fonni shaffof qilamiz
         self.setAttribute(Qt.WidgetAttribute.WA_OpaquePaintEvent, False)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
 
-        # Siz zargarlik aniqligida sozlagan daxlsiz o'lchamlar (7px normal / 12px hover)
-        self.normal_width = 7         
-        self.hover_width = 12          
-        self.setFixedWidth(self.hover_width)
-        
+        # Zargarlik aniqligida sozlangan daxlsiz o'lchamlar (7px normal / 12px hover)
+        self.normal_width = 7
+        self.hover_width = 12
+
+        # Ramkali scroll barlar (Buyruq, Navbat, Log) uchun joy kengroq —
+        # extent (18px). Oramasiz asosiy scroll bar esa 12px da qoladi.
+        self._widget_width = extent if framed_on_hover else self.hover_width
+        self.setFixedWidth(self._widget_width)
+
         self.setMouseTracking(True)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
@@ -45,15 +58,15 @@ class SlimVerticalScrollBar(QScrollBar):
         self._repeat_timer = QTimer(self)
         self._repeat_timer.timeout.connect(self._repeat_scroll_step)
 
-    # ── O'lchamlar (Loyihaga moslik) ──────────────────────────────
+    # ── O'lchamlar ───────────────────────────────────────────────
 
     def sizeHint(self) -> QSize:
-        return QSize(self.hover_width, super().sizeHint().height())
+        return QSize(self._widget_width, super().sizeHint().height())
 
     def minimumSizeHint(self) -> QSize:
-        return QSize(self.hover_width, super().minimumSizeHint().height())
+        return QSize(self._widget_width, super().minimumSizeHint().height())
 
-    # ── Ichki Geometriya Hisob-kitoblari ──────────────────────────
+    # ── Ichki Geometriya Hisob-kitoblari (barchasi markazda) ─────
 
     def _groove_top(self) -> float:
         return 17.0                     # Tepa uchburchak va tayoqcha orasidagi masofa
@@ -61,23 +74,22 @@ class SlimVerticalScrollBar(QScrollBar):
     def _groove_bottom(self) -> float:
         return 17.0                     # Pastki uchburchak va tayoqcha orasidagi masofa
 
-    def _track_rect(self) -> QRectF:
-        right_m = 5
-        top_m = self._groove_top()
-        bottom_m = self._groove_bottom()
-
+    def _track_width(self) -> float:
+        # Chizish kengligi qirralardan 2px masofada turadi: uchburchaklar
+        # (±4.5px) hech qachon chetga kesilmaydi.
+        margin = 2.0
         if self.is_hovered or self._dragging:
-            x_pos = 0.0
-            current_width = self.hover_width - right_m
-        else:
-            x_pos = 5.0
-            current_width = self.normal_width - right_m
+            return self.hover_width - margin    # 10px
+        return self.normal_width - margin       # 5px
 
+    def _track_rect(self) -> QRectF:
+        track_width = self._track_width()
+        x_pos = (self.width() - track_width) / 2.0
         return QRectF(
-            x_pos, 
-            top_m, 
-            current_width, 
-            self.height() - (top_m + bottom_m)
+            x_pos,
+            self._groove_top(),
+            track_width,
+            self.height() - (self._groove_top() + self._groove_bottom()),
         )
 
     def _handle_rect(self) -> QRectF:
@@ -112,53 +124,45 @@ class SlimVerticalScrollBar(QScrollBar):
         hovered = self.underMouse() or self._dragging
         track = self._track_rect()
         handle = self._handle_rect()
+        center_x = track.left() + track.width() / 2.0
 
-        # 1. Orqa fon yo'lini (Track) chizish
+        # 1. Orqa fon: ramkali scroll barlarda doimiy kulrang tasma
+        if self._framed_on_hover:
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.setBrush(QColor("#3a3a3a"))
+            painter.drawRect(QRectF(0, 0, self.width(), self.height()))
+
+        # 2. Hover'da tasma ustiga to'rtburchakli fon yo'li (Track)
         if hovered:
             painter.setPen(Qt.PenStyle.NoPen)
             painter.setBrush(QColor("#252526"))
             track_radius = track.width() / 2.0
             painter.drawRoundedRect(track, track_radius, track_radius)
-        elif self._framed_on_hover:
+
+        # 2. ▲ TEPA va ▼ PASTKI UCHBURCHAKLAR — faqat hover'da,
+        #    track o'qi bo'yicha markazda (chetlarda kesilmaydi)
+        if hovered:
             painter.setPen(Qt.PenStyle.NoPen)
-            painter.setBrush(QColor("#3a3a3a"))
-            painter.drawRect(QRectF(0, 0, self.width(), self.height()))
-
-        # Uchburchak qirralarini mutloq silliq qiluvchi maxsus qalam
-        arrow_color = QColor("#aaaaaa") if hovered else Qt.GlobalColor.transparent
-        arrow_pen = QPen(arrow_color)
-        arrow_pen.setWidthF(1.5)                         
-        arrow_pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin) 
-        arrow_pen.setCapStyle(Qt.PenCapStyle.RoundCap)   
-
-        # 2. ▲ TEPA UCHBURCHAK O'QINI CHIZISH
-        if arrow_color != Qt.GlobalColor.transparent:
-            painter.setPen(arrow_pen)
-            painter.setBrush(arrow_color) 
-            center_x = track.left() + track.width() / 2.0
+            painter.setBrush(QColor("#aaaaaa"))
+            half = self._ARROW_HALF_WIDTH
+            h = self._ARROW_HEIGHT
             up_arrow = QPolygonF([
-                QPointF(center_x, 3.0),          
-                QPointF(center_x - 4.5, 8.5),   
-                QPointF(center_x + 4.5, 8.5)    
+                QPointF(center_x, 3.0),
+                QPointF(center_x - half, 3.0 + h),
+                QPointF(center_x + half, 3.0 + h),
             ])
             painter.drawPolygon(up_arrow)
-
-        # 3. ▼ PASTKI UCHBURCHAK O'QINI CHIZISH
-        if arrow_color != Qt.GlobalColor.transparent:
-            painter.setPen(arrow_pen)
-            painter.setBrush(arrow_color) 
-            center_x = track.left() + track.width() / 2.0
-            bottom_y = self.height() - 3.0       
+            bottom_y = self.height() - 3.0
             down_arrow = QPolygonF([
-                QPointF(center_x, bottom_y),          
-                QPointF(center_x - 4.5, bottom_y - 5.5), 
-                QPointF(center_x + 4.5, bottom_y - 5.5)  
+                QPointF(center_x, bottom_y),
+                QPointF(center_x - half, bottom_y - h),
+                QPointF(center_x + half, bottom_y - h),
             ])
             painter.drawPolygon(down_arrow)
 
-        # 4. SURILUVCHI TAYOQCHANI (Handle) CHIZISH
+        # 3. SURILUVCHI TAYOQCHANI (Handle) CHIZISH
         if self._dragging:
-            handle_color = QColor("#59b9ed") # Sudralgandagi ko'k effekt daxlsiz saqlandi
+            handle_color = QColor("#59b9ed")  # Sudralgandagi ko'k effekt daxlsiz saqlandi
         elif hovered:
             handle_color = QColor("#888888")
         else:
@@ -234,10 +238,10 @@ class SlimVerticalScrollBar(QScrollBar):
         track = self._track_rect()
         handle = self._handle_rect()
         usable = max(1.0, track.height() - handle.height())
-        
+
         new_top = event.position().y() - self._drag_offset
         new_top = max(groove_top, min(groove_top + usable, new_top))
-        
+
         ratio = (new_top - groove_top) / usable
         value = self.minimum() + round(ratio * (self.maximum() - self.minimum()))
         self.setValue(value)

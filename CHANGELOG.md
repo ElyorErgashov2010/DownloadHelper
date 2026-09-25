@@ -44,12 +44,24 @@ saqlanadi.
 - Progress paneli endi Windows 7 Explorer uslubidagi to'lqinli barga almashtirildi:
   **«0%»** matni bar markazida turadi, foiz o'tayotganda yashil to'lqin jonli
   harakatlanadi va foiz yozuvi to'lqin ustidan chiqib turadi. (#4)
-- **«?»** yordam tugmalari endi to'rtburchak (ramkali, tekis burchakli);
-  **«Qayta tekshirish»** hamda barcha tugmalar bir xil izchil uslubda. (#4)
+- **«?»** yordam tugmalari endi dumalaq (aylan) ramkali uslubda;
+  **«Qayta tekshirish»** va boshqa tugmalar Windows native uslubda. (#4)
 - **«Xato bo'lsa qayta urinishlar»** spinbox'ida aniq ko'rinadigan ▲/▼ tugmalar. (#4)
 - Scroll bar endi sichqoncha bormaganda ingichka, borganda kengayadi va ▲▼
   tugmalar ko'rinadi; ▲▼ ni bosib turilganda scroll auto-repeat bilan
   to'xtovsiz davom etadi. (#5)
+- Scroll bar track'i, tutqichi va ▲▼ uchburchaklari endi widget kengligi
+  bo'yicha markazda chiziladi — uchburchaklar chap qirrada kesilmaydi va
+  o'ng tomonda ortiqcha bo'sh joy qolmaydi.
+- Buyruq / Navbat / Loglar scroll barlari nazarda tutilgan 18px kenglikda
+  chiziladi (avval belgilangan 18px o'rniga 12px qo'llanilgan) — ▲▼
+  uchburchaklari uchun yetarli joy bo'ldi.
+- «**?**» yordam tugmalari matni endi aniq ko'rinadi: global tugma uslubidagi
+  `padding: 5px 12px` 22×22 tugmadagi «?» ni siqib yashirib qo'yayotgan;
+  «?» tugmalari `padding: 0` va aniq matn rangli dumalaq uslubga o'tkazildi.
+- «Xato bo'lsa qayta urinishlar» spinbox'ining ▲/▼ tugmalari: QSS border
+  usuli Windows 11 style'da kvadrat chizgan edi — uchburchaklar endi kod
+  bilan chiziladi (aniq ▲/▼, hover'da oqaradi).
 - README'dagi namuna interfeys rasmi vaqtincha olib tashlandi; beta testdan
   keyin haqiqiy Windows screenshot bilan almashtiriladi. (#4)
 - Kichik oyna scroll'i uchun to'g'ri kenglik saqlanadi; hover holatida o'ng
@@ -57,6 +69,11 @@ saqlanadi.
 
 ### O'zgardi
 
+- Barcha tugmalar (Buyruqni tahlil qilish, Joylash, Qayta tekshirish,
+  Normallashtirish, Tanlash, Sozlamalar va h.k.) endi
+  `fix/windows-ui-and-scroll` shoxasidagidek Windows native uslubda; global
+  QSS (`app/theme.py`) olib tashlandi. «Navbat» va «S3 xatolari» ochish
+  tugmalari esa o'z maxsus uslublarini saqlab qoldi.
 - GUI bog'liqligi PyQt6 o'rniga `PySide6-Essentials`ga o'tkazildi.
 - Fayl nomi transliteratsiyasi `text-unidecode`dan foydalanadi.
 - `version_info.txt`ning foydalanuvchi ko'radigan versiyasi `1.4.1`ga
