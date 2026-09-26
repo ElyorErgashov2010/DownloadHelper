@@ -41,6 +41,16 @@ saqlanadi.
 
 ### Tuzatildi
 
+- **Ilova idle holatda CPU band qilib qo'yayotgan edi**: to'lqinli progress
+  bar'dagi animatsiya taymeri widget yaratilishi bilan boshlanib, hech qachon
+  to'xtamaydi edi («0%» holatida ham har 30 ms da qayta chizilardi). Endi
+  to'lqin faqat faol yuklash paytida (0 < foiz < 100) harakatlanadi.
+- **Tray ikonkasiga (hidden icons) bosilganda hech narsa bo'lmaydi edi**:
+  endi chap bosish asosiy oynani oldinga chiqaradi, o'ng bosish
+  «Oynani ochish» / «Ochirish» menyusini ochadi.
+- Ilova qayta bosilganda ikkinchi jarayon ochilmasligi uchun **yagona
+  instancia** himoyasi qo'shildi: qayta bosilganda mavjud asosiy oyna
+  oldinga chiqariladi va yangi jarayon darhol tugaydi.
 - Progress paneli endi Windows 7 Explorer uslubidagi to'lqinli barga almashtirildi:
   **«0%»** matni bar markazida turadi, foiz o'tayotganda yashil to'lqin jonli
   harakatlanadi va foiz yozuvi to'lqin ustidan chiqib turadi. (#4)

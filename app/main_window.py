@@ -66,6 +66,7 @@ class MainWindow(QMainWindow):
         self._task_mgr = TaskManager()
         self._downloader = Downloader(self)
         self._notifier = Notifier()
+        self._notifier.set_window(self)
         self._uploader: S3Uploader | None = None
         self._cancelling = False
         self._current_item: QueueItem | None = None

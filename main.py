@@ -33,10 +33,71 @@ def _install_error_log():
     sys.excepthook = _excepthook
 
 
+_SINGLE_INSTANCE_KEY = "DownloadHelper_SingleInstance_v1"
+
+
+def _acquire_single_instance(app):
+    """Faqat bitta GUI jarayoni ishlashini kafolatlaydi.
+
+    Agar ilova allaqachon ishlayotgan bo'lsa, mavjud instansiyaga «show»
+    yozuvi yuboriladi (u asosiy oynani oldinga chiqaradi) va None qaytariladi
+    — yangi jarayon darhol chiqishi kerak.
+
+    Aks holda boshqa bosilishlar uchun QLocalServer ochiladi va server
+    qaytariladi. Server `app` ga bog'lab saqlanadi (jonli qolishi uchun).
+    """
+    from PySide6.QtNetwork import QLocalServer, QLocalSocket
+    from PySide6.QtWidgets import QMainWindow
+
+    client = QLocalSocket()
+    client.connectToServer(_SINGLE_INSTANCE_KEY)
+    if client.waitForConnected(300):
+        # Mavjud instansiya ishlayapti — unga «oynani ko'rsat» signal yuboramiz.
+        try:
+            client.write(b"show")
+            client.flush()
+            client.waitForBytesWritten(300)
+        finally:
+            client.disconnectFromServer()
+        return None
+
+    # Server yo'q — biz birinchi instansiya.
+    server = QLocalServer(app)
+    QLocalServer.removeServer(_SINGLE_INSTANCE_KEY)
+
+    def _on_new_connection():
+        conn = server.nextPendingConnection()
+        if conn is None:
+            return
+
+        def _read_signal():
+            if b"show" not in conn.readAll().data():
+                return
+            for w in app.topLevelWidgets():
+                if isinstance(w, QMainWindow) and w.isVisible():
+                    w.showNormal()
+                    w.raise_()
+                    w.activateWindow()
+                    break
+
+        conn.readyRead.connect(_read_signal)
+        conn.disconnected.connect(conn.deleteLater)
+
+    server.newConnection.connect(_on_new_connection)
+    # Server `app` ga bog'lab saqlanadi — jonli qolishi shart.
+    app._single_instance_server = server
+    if not server.listen(_SINGLE_INSTANCE_KEY):
+        # Nadir holat (masalan, ikki bosish shu paytda): ochilishni blok
+        # qilmaymiz, faqat keyingi «show» signallarini ololmaymiz.
+        pass
+    return server
+
+
 def main():
     argv = sys.argv[1:]
 
-    # Headless (GUI'siz) rejim: bot yoki skript chaqirig'i
+    # Headless (GUI'siz) rejim: bot yoki skript chaqirig'i — bu yerda
+    # yagona instansiya qoidalari qo'llanmaydi (serverlarni qo'ng'iroq qiladi).
     if "--run" in argv:
         from app.cli_runner import run_cli
         sys.exit(run_cli(argv))
@@ -51,6 +112,12 @@ def main():
 
     app = QApplication(sys.argv)
     app.setApplicationName("Download Helper")
+
+    # Ilova allaqachon ochiq bo'lsa — mavjud oynani oldinga chiqarib,
+    # ikkinchi jarayonni o'chiramiz.
+    if _acquire_single_instance(app) is None:
+        sys.exit(0)
+
     window = MainWindow()
     window.show()
     # Oyna ba'zan ekran chetida yoki minimallashtirilgan qoladi — bu uni
