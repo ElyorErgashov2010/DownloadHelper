@@ -38,7 +38,7 @@ jobs:
       - name: Build DownloadHelper.exe
         shell: pwsh
         run: |
-          pyinstaller --noconfirm --clean --onefile --windowed `
+          pyinstaller --noconfirm --clean --onedir --windowed `
             --name "DownloadHelper" --version-file version_info.txt --noupx main.py
 
       - name: Download N_m3u8DL-RE
@@ -71,7 +71,7 @@ jobs:
           $exe = Get-ChildItem -Path 'n_m3u8dl-re_extracted' -Recurse -Filter 'N_m3u8DL-RE.exe' |
             Select-Object -First 1
           if ($null -eq $exe) { throw 'N_m3u8DL-RE.exe was not found in upstream archive.' }
-          Copy-Item $exe.FullName -Destination 'dist/N_m3u8DL-RE.exe'
+          Copy-Item $exe.FullName -Destination 'dist/DownloadHelper/N_m3u8DL-RE.exe'
 
       - name: Download FFmpeg
         shell: pwsh
@@ -103,7 +103,7 @@ jobs:
           $exe = Get-ChildItem -Path 'ffmpeg_extracted' -Recurse -Filter 'ffmpeg.exe' |
             Select-Object -First 1
           if ($null -eq $exe) { throw 'ffmpeg.exe was not found in upstream archive.' }
-          Copy-Item $exe.FullName -Destination 'dist/ffmpeg.exe'
+          Copy-Item $exe.FullName -Destination 'dist/DownloadHelper/ffmpeg.exe'
 
       - name: Download Bento4 mp4decrypt
         shell: pwsh
@@ -115,15 +115,15 @@ jobs:
           $exe = Get-ChildItem -Path 'bento4_extracted' -Recurse -Filter 'mp4decrypt.exe' |
             Select-Object -First 1
           if ($null -eq $exe) { throw 'mp4decrypt.exe was not found in Bento4 SDK archive.' }
-          Copy-Item $exe.FullName -Destination 'dist/mp4decrypt.exe'
+          Copy-Item $exe.FullName -Destination 'dist/DownloadHelper/mp4decrypt.exe'
 
       - name: Add notices and create test ZIP
         shell: pwsh
         run: |
-          Copy-Item 'LICENSE' 'dist/LICENSE.txt'
-          Copy-Item 'THIRD_PARTY_NOTICES.md' 'dist/THIRD_PARTY_NOTICES.txt'
-          Compress-Archive -Path 'dist/*' -DestinationPath 'DownloadHelper-test-win-x64.zip' -Force
-          $files = @('dist/DownloadHelper.exe', 'DownloadHelper-test-win-x64.zip')
+          Copy-Item 'LICENSE' 'dist/DownloadHelper/LICENSE.txt'
+          Copy-Item 'THIRD_PARTY_NOTICES.md' 'dist/DownloadHelper/THIRD_PARTY_NOTICES.txt'
+          Compress-Archive -Path 'dist/DownloadHelper' -DestinationPath 'DownloadHelper-test-win-x64.zip' -Force
+          $files = @('DownloadHelper-test-win-x64.zip')
           $hashes = foreach ($file in $files) {
             $hash = Get-FileHash -Path $file -Algorithm SHA256
             "$($hash.Hash)  $([System.IO.Path]::GetFileName($file))"

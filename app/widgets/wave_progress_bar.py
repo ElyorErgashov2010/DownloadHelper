@@ -29,7 +29,6 @@ class WaveProgressBar(QProgressBar):
         super().__init__(parent)
         self._show_percent = show_percent
         self.setRange(0, 100)
-        self.setValue(0)
         self.setTextVisible(False)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.setMinimumHeight(38)
@@ -41,9 +40,42 @@ class WaveProgressBar(QProgressBar):
         self._drift_timer = QTimer(self)
         self._drift_timer.setInterval(30)
         self._drift_timer.timeout.connect(self._on_drift_tick)
-        self._drift_timer.start()
+        # To'lqin harakati faqat faol yuklash paytida (0 < foiz < 100) ishlaydi:
+        # idle ("0%") va yakunlangan ("100%") holatlarda timer to'xtaydi va
+        # CPU band qilinmaydi.
+        self.setValue(0)
 
     # ── Jonli harakat ────────────────────────────────────────────
+
+    def setValue(self, value):
+        super().setValue(value)
+        self._sync_animation()
+
+    def _sync_animation(self):
+        """To'lqin animatsiyasini faqat faol jarayon davomida ishlatadi."""
+        active = 0 < self.value() < 100
+        if active and not self._drift_timer.isActive():
+            self._drift_timer.start()
+        elif not active and self._drift_timer.isActive():
+            self._drift_timer.stop()
+            self._wave_shift = 0.0
+            self._tick = 0.0
+            self.update()
+
+    def set_wave_active(self, active: bool):
+        """To'lqin harakatini qo'lda boshqarish.
+
+        Masalan, yuklash xato bilan tugaganida bar oxirgi foizda qoladi,
+        lekin to'lqin uzluksiz oqib turmasligi kerak.
+        """
+        if active:
+            if 0 < self.value() < 100 and not self._drift_timer.isActive():
+                self._drift_timer.start()
+        elif self._drift_timer.isActive():
+            self._drift_timer.stop()
+            self._wave_shift = 0.0
+            self._tick = 0.0
+            self.update()
 
     def _on_drift_tick(self):
         self._tick += 0.03

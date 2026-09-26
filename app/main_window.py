@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 from PySide6.QtWidgets import (
     QMainWindow, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout,
-    QPushButton, QLabel, QMessageBox, QSpinBox, QFileDialog, QListWidget,
+    QPushButton, QLabel, QMessageBox, QFileDialog, QListWidget,
     QListWidgetItem, QCheckBox, QApplication, QFrame, QScrollArea, QLayout,
 )
 from PySide6.QtCore import QSize, Qt, QTimer, QUrl
@@ -26,7 +26,7 @@ from app.widgets.destination_panel import DestinationPanel
 from app.widgets.log_panel import LogPanel
 from app.widgets.progress_panel import ProgressPanel
 from app.widgets.slim_scrollbar import SlimVerticalScrollBar
-from app.widgets.spinbox import SpinBoxFocusToBottom
+from app.widgets.spinbox import ArrowSpinBox
 from app.widgets.task_list import TaskList
 from app.dialogs.s3_config_dialog import S3ConfigDialog
 from app.dialogs.help_dialog import HelpDialog
@@ -66,6 +66,7 @@ class MainWindow(QMainWindow):
         self._task_mgr = TaskManager()
         self._downloader = Downloader(self)
         self._notifier = Notifier()
+        self._notifier.set_window(self)
         self._uploader: S3Uploader | None = None
         self._cancelling = False
         self._current_item: QueueItem | None = None
@@ -101,8 +102,9 @@ class MainWindow(QMainWindow):
         auto_help_btn.setFixedSize(22, 22)
         auto_help_btn.setToolTip("Avto-rejim yordami")
         auto_help_btn.setStyleSheet(
-            "QPushButton { font-weight: bold; font-size: 13px; border: 1px solid #767676; "
-            "border-radius: 4px; background: #353535; color: #e8e8e8; }"
+            "QPushButton { font-weight: bold; font-size: 11px; padding: 0; "
+            "border-radius: 11px; border: 1px solid #777777; "
+            "background: #353535; color: #e8e8e8; }"
             "QPushButton:hover { border-color: #21a8f3; background: #454545; }"
         )
         auto_help_btn.clicked.connect(self._on_auto_help)
@@ -113,8 +115,9 @@ class MainWindow(QMainWindow):
         help_btn.setFixedSize(28, 28)
         help_btn.setToolTip("Yordam (F1)")
         help_btn.setStyleSheet(
-            "QPushButton { font-weight: bold; font-size: 16px; border: 1px solid #767676; "
-            "border-radius: 4px; background: #353535; color: #e8e8e8; }"
+            "QPushButton { font-weight: bold; font-size: 14px; padding: 0; "
+            "border-radius: 14px; border: 1px solid #777777; "
+            "background: #353535; color: #e8e8e8; }"
             "QPushButton:hover { border-color: #21a8f3; background: #454545; }"
         )
         help_btn.clicked.connect(self._on_help)
@@ -210,13 +213,12 @@ class MainWindow(QMainWindow):
         # Qator: qayta urinishlar + tugmalar
         ctrl_row = QHBoxLayout()
         ctrl_row.addWidget(QLabel("Xato bo'lsa qayta urinishlar:"))
-        self._retry_spin = QSpinBox()
+        # Windows 11 style'dagi mayda chevronlar o'rniga kod bilan chizilgan
+        # aniq yuqori/pastki tugmalar (▲/▼).
+        self._retry_spin = ArrowSpinBox()
         self._retry_spin.setRange(0, 10)
         self._retry_spin.setValue(2)
         self._retry_spin.setToolTip("Yuklashda xato bo'lsa qayta urinishlar soni")
-        # Windows 11 style'dagi mayda chevronlar o'rniga aniq ko'rinadigan
-        # yuqori/pastki tugmalar (▲/▼).
-        SpinBoxFocusToBottom.patch(self._retry_spin)
         ctrl_row.addWidget(self._retry_spin)
 
         ctrl_row.addSpacing(20)
@@ -251,6 +253,16 @@ class MainWindow(QMainWindow):
         self._queue_toggle.setMinimumHeight(32)
         self._queue_toggle.setCursor(Qt.CursorShape.PointingHandCursor)
         self._queue_toggle.setToolTip("Navbatni ko'rsatish yoki yashirish")
+        self._queue_toggle.setStyleSheet(
+            "QPushButton {"
+            " border: 1px solid #747474; border-radius: 5px;"
+            " padding: 5px 10px; color: #e8e8e8; background: #383838;"
+            " font-size: 12px; font-weight: 600; text-align: left;"
+            "}"
+            "QPushButton:hover { background: #484848; border-color: #a0a0a0; }"
+            "QPushButton:pressed { background: #2f2f2f; }"
+            "QPushButton:checked { background: #28547c; border-color: #66a9df; }"
+        )
         self._queue_toggle.setCheckable(True)
         self._queue_toggle.clicked.connect(self._on_toggle_queue)
         queue_header.addWidget(self._queue_toggle)
@@ -282,6 +294,10 @@ class MainWindow(QMainWindow):
         # S3 xatolari paneli
         s3_fail_header = QHBoxLayout()
         self._s3_fail_toggle = QPushButton("▶ S3 xatolari (0)")
+        self._s3_fail_toggle.setStyleSheet(
+            "QPushButton { border: none; color: #cc3333; font-size: 12px; "
+            "text-align: left; font-weight: bold; }"
+        )
         self._s3_fail_toggle.setCheckable(True)
         self._s3_fail_toggle.clicked.connect(self._on_toggle_s3_failures)
         self._s3_fail_toggle.setVisible(False)

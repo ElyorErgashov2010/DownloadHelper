@@ -118,4 +118,7 @@ class ProgressPanel(QWidget):
             self._status_label.setText("Tayyor")
             self._info_label.setText("")
         else:
+            # Bar oxirgi foizda qoladi, lekin to'lqin uzluksiz oqib
+            # turmasligi kerak (aks holda xato ekranida ham CPU band).
+            self._progress_bar.set_wave_active(False)
             self._status_label.setText("Xato")
