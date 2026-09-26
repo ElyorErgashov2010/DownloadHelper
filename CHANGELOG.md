@@ -79,6 +79,12 @@ saqlanadi.
 
 ### O'zgardi
 
+- Build rejimi `--onefile` dan `--onedir` ga o'tkazildi: ilova endi papka
+  sifatida build qilinadi va arxivda `DownloadHelper` papkasi ichida yetkaziladi.
+  Har ochilishda ~150 MB paketni vaqtincha papkaga dekompressiya qilish
+  (va Windows Defender'ning har faylni qayta skaneri) yo'q — ishga tushish
+  bir necha soniyaga qisqardi, Task Manager'da bitta jarayon ko'rinadi.
+  Zip ni ochib, `DownloadHelper\DownloadHelper.exe` ni ishga tushiring.
 - Barcha tugmalar (Buyruqni tahlil qilish, Joylash, Qayta tekshirish,
   Normallashtirish, Tanlash, Sozlamalar va h.k.) endi
   `fix/windows-ui-and-scroll` shoxasidagidek Windows native uslubda; global

@@ -25,21 +25,25 @@ qo'shiladi.
 
 ## Yuklab olish
 
-Tayyor exe ni **Releases** bo'limidan yuklab oling:
+Tayyor dastur arxivi ni **Releases** bo'limidan yuklab oling:
 👉 **https://github.com/ElyorErgashov2010/DownloadHelper/releases**
 
-Arxiv ichida:
+Arxiv ichida **`DownloadHelper`** papkasi bor:
 - `DownloadHelper.exe`
 - `N_m3u8DL-RE.exe`
 - `ffmpeg.exe`
 - `mp4decrypt.exe`
+- `_internal/` (dasturning ichki kutubxonalari)
 
-Hammasi bir papkada bo'lishi kerak.
+> Dastur `onedir` (papka) rejimida build qilinadi: har ochilishda vaqtincha
+> papkaga dekompressiya bo'lmaydi, ishga tushish tez va Task Manager'da
+> bitta jarayon ko'rinadi.
 
 ### Tez boshlash
 
 1. GitHub **Releases** sahifasidan ZIP faylni yuklab oling va Extract All qiling.
-2. To'rtta `.exe` fayl bir papkada turganini tekshiring.
+2. `DownloadHelper` papkasi ochilganini tekshiring (ichida `DownloadHelper.exe`
+   va uch yordamchi `.exe` bor).
 3. `DownloadHelper.exe`ni oching va **Vositalar holati** panelida uchala vosita
    `Tayyor` ekanini tekshiring.
 4. Telegram bot qaytargan N_m3u8DL-RE buyrug'ini nusxalang va **«Joylash»**ni bosing.
@@ -149,11 +153,15 @@ Xususiyatlari:
 
 ```bash
 pip install pyinstaller
-pyinstaller --onefile --windowed --name "DownloadHelper" --version-file version_info.txt --noupx main.py
+pyinstaller --onedir --windowed --name "DownloadHelper" --version-file version_info.txt --noupx main.py
 ```
 
-Tayyor fayl `dist/` papkasida paydo bo'ladi. Uning yoniga `N_m3u8DL-RE`, `ffmpeg`
-va `mp4decrypt` ni qo'ying.
+Tayyor dastur `dist/DownloadHelper/` papkasida paydo bo'ladi. Papka ichiga
+`N_m3u8DL-RE.exe`, `ffmpeg.exe` va `mp4decrypt.exe` ni qo'ying.
+
+> `--onedir` (papka) rejimi `--onefile` dan afzal: ishga tushishda paketni
+> vaqtincha papkaga dekompressiya qilish va Defender skanerlashi bo'lmaydi,
+> jarayon bitta bo'ladi.
 
 ---
 
