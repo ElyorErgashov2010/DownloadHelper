@@ -1,0 +1,443 @@
+/* ============================================================
+   Download Helper — asosiy oyna uslubi (dark, Windows 11 uslubida)
+   Ranglar app/ kodidagi eski QSS qiymatlaridan olingan:
+   - ? tugma:        #353535 / #777777 / hover #21a8f3
+   - Navbat toggle:  #383838 / #747474 / active #28547c #66a9df
+   - S3 xato:        #cc3333
+   - Link:           #4da3ff
+   ============================================================ */
+
+:root {
+  --bg: #1f1f1f;            /* oyna foni */
+  --bg-panel: #262626;      /* ro'yxat/jadval foni */
+  --bg-input: #2b2b2b;      /* input/textarea foni */
+  --bg-btn: #353535;        /* tugma foni */
+  --bg-btn-hover: #3f3f3f;
+  --bg-btn-active: #2a2a2a;
+  --border: #4d4d4d;        /* input cheklovi */
+  --border-btn: #6f6f6f;    /* tugma cheklovi */
+  --border-frame: #666666;  /* «Vositalar holati» ramkasi */
+  --text: #e8e8e8;
+  --text-dim: #9a9a9a;
+  --text-placeholder: #8a8a8a;
+  --link: #4da3ff;
+  --accent: #4cc2ff;        /* radio/checkbox belgilari */
+  --ok: #4cd964;
+  --err: #ff6b6b;
+  --err-border: #cc3333;
+  --selected-bg: #28547c;   /* tanlangan qator / active toggle */
+  --selected-border: #66a9df;
+  --mono: Consolas, "Cascadia Mono", "Courier New", monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  overflow: hidden;
+  user-select: none;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 8px 10px 6px;
+  gap: 6px;
+}
+
+.spacer { flex: 1; }
+.gap { width: 20px; }
+.dim { color: var(--text-dim); font-size: 11px; }
+
+/* ── Yuqori qator ─────────────────────────────────────── */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 2px 2px 0;
+}
+
+.chk {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.chk input { accent-color: var(--accent); width: 15px; height: 15px; margin: 0; cursor: pointer; }
+.chk input:disabled { cursor: default; }
+.chk.s3del { padding: 4px 0 0; }
+
+/* «?» dumalaq yordam tugmalari — maydon biroz kengroq, belgi kesilmaydi */
+.qbtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 17px;
+  border: 1px solid #777777;
+  background: #353535;
+  color: #e8e8e8;
+  font-size: 15px;
+  font-weight: bold;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.qbtn.small { width: 27px; height: 27px; border-radius: 13px; font-size: 12px; }
+.qbtn:hover { border-color: #21a8f3; background: #454545; }
+.qbtn:active { background: #2c2c2c; }
+
+/* ── Varaq (tab) tanlash ───────────────────────────────── */
+
+.tabs {
+  display: flex;
+  gap: 2px;
+  background: #191919;
+  border: 1px solid var(--border);
+  border-radius: 7px 7px 0 0;
+  padding: 4px 6px 0;
+}
+.tab {
+  appearance: none;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #c8c8c8;
+  font-size: 13px;
+  font-family: inherit;
+  padding: 6px 14px 5px;
+  border-radius: 5px 5px 0 0;
+  cursor: pointer;
+}
+.tab:hover { color: #fff; background: #232323; }
+.tab.active {
+  color: #fff;
+  background: #262626;
+  border-bottom: 2px solid var(--accent);
+}
+
+/* ── Varaq sahifasi: atrol scroll joy band qilmaydi ────── */
+
+.tabpage {
+  display: none;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border: 1px solid var(--border);
+  border-radius: 0 0 7px 7px;
+  padding: 10px 12px 8px;
+  flex-direction: column;
+  gap: 7px;
+  scrollbar-width: thin;
+  scrollbar-color: #5a5a5a transparent;
+}
+.tabpage.active { display: flex; }
+
+/* ── Umumiy elementlar ─────────────────────────────────── */
+
+.hint { color: #9a9a9a; font-size: 11px; line-height: 1.45; }
+.hint a { color: var(--link); text-decoration: none; }
+.hint a:hover { text-decoration: underline; }
+
+.lbl { color: var(--text); font-size: 13px; white-space: nowrap; }
+.lbl.inline { padding-top: 7px; }
+
+.row { display: flex; align-items: center; gap: 8px; }
+.row > .lbl { flex: 0 0 auto; }
+
+input[type="text"], textarea, select {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  padding: 6px 9px;
+  min-width: 0;
+  outline: none;
+}
+input[type="text"] { flex: 1; }
+input[type="text"]:focus, textarea:focus, select:focus { border-color: var(--accent); }
+input[type="text"]::placeholder, textarea::placeholder { color: var(--text-placeholder); }
+input:disabled, select:disabled { opacity: 0.55; cursor: default; }
+
+textarea#cmd {
+  width: 100%;
+  height: 100px;
+  resize: none;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.45;
+  user-select: text;
+  scrollbar-width: thin;
+  scrollbar-color: #5a5a5a transparent;
+}
+
+select#s3Profile {
+  flex: 0 0 auto;
+  width: 160px;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' stroke='%23c8c8c8' stroke-width='1.5' fill='none' stroke-linecap='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 9px center;
+  padding-right: 26px;
+}
+
+/* ── Tugmalar (Windows native uslubida) ────────────────── */
+
+.btn {
+  appearance: none;
+  background: var(--bg-btn);
+  border: 1px solid var(--border-btn);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  padding: 6px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn:hover:not(:disabled) { background: var(--bg-btn-hover); border-color: #8a8a8a; }
+.btn:active:not(:disabled) { background: var(--bg-btn-active); }
+.btn:disabled {
+  opacity: 0.42;           /* bosilmaydigan tugma — «o'chgandek» */
+  cursor: default;
+}
+.btn.small { font-size: 12px; padding: 4px 10px; }
+
+/* Navbat ochish tugmasi (checkable) */
+.queue-toggle {
+  min-height: 34px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.queue-toggle.on {
+  background: var(--selected-bg);
+  border-color: var(--selected-border);
+}
+
+/* ── Vositalar holati ramkasi ──────────────────────────── */
+
+.frame-label {
+  border: 1px solid var(--border-frame);
+  border-radius: 5px;
+  padding: 5px 9px;
+  white-space: nowrap;
+}
+.tools .frame-label:first-child { font-weight: bold; }
+.tools-status {
+  flex: 1;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 30px;
+}
+.tools-status .ok { color: var(--ok); }
+.tools-status .bad { color: #ff7676; }
+.tools-status b { font-weight: 600; }
+
+/* ── Qayta urinish dropdown (1..10) ────────────────────── */
+
+.dropdown { position: relative; flex: 0 0 auto; }
+.dd-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 110px;
+  height: 32px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  padding: 0 10px;
+  cursor: pointer;
+}
+.dd-btn:hover { border-color: #6a6a6a; }
+.dd-btn.open { border-color: var(--accent); }
+.dd-val { flex: 1; text-align: left; }
+.chev {
+  width: 10px; height: 10px;
+  border-right: 1.6px solid #c8c8c8;
+  border-bottom: 1.6px solid #c8c8c8;
+  transform: rotate(45deg) translateY(-2px);
+}
+
+.dd-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  background: #2b2b2b;
+  border: 1px solid #5a5a5a;
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+  z-index: 50;
+  max-height: 120px;              /* 4 ta option ko'rinadi */
+  overflow-y: auto;
+  padding: 3px;
+  display: none;
+  scrollbar-width: thin;
+  scrollbar-color: #565656 transparent;
+}
+.dd-list.open { display: block; }
+.dd-list::-webkit-scrollbar { width: 6px; }
+.dd-list::-webkit-scrollbar-thumb { background: #565656; border-radius: 3px; }
+.dd-list::-webkit-scrollbar-track { background: transparent; }
+
+.dd-item {
+  height: 27px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.dd-item:hover { background: rgba(255, 255, 255, 0.06); }
+.dd-item.selected { background: rgba(255, 255, 255, 0.10); } /* bilinar-bilinmas kulrang */
+
+/* ── Navbat / S3 xatolari ro'yxatlari ──────────────────── */
+
+.listbox {
+  list-style: none;
+  margin: 0;
+  padding: 3px;
+  max-height: 120px;
+  overflow-y: auto;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  scrollbar-width: thin;
+  scrollbar-color: #5a5a5a transparent;
+}
+.listbox::-webkit-scrollbar { width: 8px; }
+.listbox::-webkit-scrollbar-thumb { background: #5a5a5a; border-radius: 4px; }
+.listbox li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+.listbox li:hover { background: rgba(255, 255, 255, 0.04); }
+.listbox li.selected { background: var(--selected-bg); }
+.listbox label { display: flex; align-items: center; gap: 8px; flex: 1; cursor: pointer; user-select: none; }
+.listbox input[type="checkbox"] { accent-color: var(--accent); width: 14px; height: 14px; margin: 0; }
+
+.s3-toggle {
+  appearance: none;
+  background: none;
+  border: none;
+  color: #ff6b6b;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: left;
+  padding: 2px 0;
+  cursor: pointer;
+}
+.s3-toggle:hover { color: #ff8f8f; }
+.s3fail-list { border-color: var(--err-border); }
+.s3fail-list li { color: var(--err); }
+
+/* ── Progress (progressbar.html iframe) ────────────────── */
+
+iframe#progressFrame {
+  width: 100%;
+  height: 38px;
+  border: none;
+  display: block;
+  background: transparent;
+}
+.progress-info { min-height: 18px; }
+#progressStatus { font-size: 12px; }
+
+/* ── Loglar ────────────────────────────────────────────── */
+
+.logbox {
+  flex: 1;
+  min-height: 150px;
+  max-height: 1000px;
+  resize: vertical;
+  overflow-y: auto;
+  background: #1b1b1b;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 8px 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  user-select: text;
+  scrollbar-width: thin;
+  scrollbar-color: #5a5a5a transparent;
+}
+.logbox::-webkit-scrollbar { width: 8px; }
+.logbox::-webkit-scrollbar-thumb { background: #5a5a5a; border-radius: 4px; }
+
+/* ── Tarix jadvali ─────────────────────────────────────── */
+
+.tablewrap {
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  overflow: auto;
+  max-height: 46vh;
+  background: var(--bg-panel);
+  scrollbar-width: thin;
+  scrollbar-color: #5a5a5a transparent;
+}
+.tasktable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.tasktable th {
+  position: sticky;
+  top: 0;
+  background: #2f2f2f;
+  text-align: left;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.tasktable td {
+  padding: 6px 10px;
+  border-bottom: 1px solid #2e2e2e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 420px;
+}
+.tasktable td.c-name { max-width: 420px; }
+.tasktable th.c-name { max-width: none; }
+.tasktable tbody tr { cursor: pointer; }
+.tasktable tbody tr:nth-child(even) { background: #232323; }
+.tasktable tbody tr:hover { background: #2a2a2a; }
+.tasktable tbody tr.selected { background: var(--selected-bg); }
+.tasktable .st-Done { color: var(--ok); }
+.tasktable .st-Failed { color: var(--err); }
+.tasktable .st-Downloading, .tasktable .st-Uploading { color: var(--link); }
+
+/* ── Pastki qator ──────────────────────────────────────── */
+
+.footer { padding: 2px 2px 0; }
+.footer a { color: #808080; font-size: 11px; text-decoration: none; }
+.footer a:hover { text-decoration: underline; }

@@ -102,13 +102,13 @@ def main():
         from app.cli_runner import run_cli
         sys.exit(run_cli(argv))
 
-    # Oddiy GUI rejim. Windows o'zining native light/dark dizaynini
-    # ishlatadi — tugmalar native (fix/windows-ui-and-scroll uslubi).
+    # Oddiy GUI rejim. Interfeys HTML/CSS/JS (QWebEngineView) asosida,
+    # mantiq Python da (app/web_main_window.py).
     _install_error_log()
 
     from PySide6.QtWidgets import QApplication
 
-    from app.main_window import MainWindow
+    from app.web_main_window import MainWindow
 
     app = QApplication(sys.argv)
     app.setApplicationName("Download Helper")

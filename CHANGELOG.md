@@ -5,6 +5,40 @@ saqlanadi.
 
 ## [Unreleased]
 
+### Katta o'zgarish — HTML interfeys
+
+- Asosiy oyna interfeysi **HTML/CSS/JS** ga o'tkazildi (QWebEngineView):
+  fayllar `app/web/` da (`index.html`, `style.css`, `app.js`).
+  Mantiq (yuklab olish, navbat, S3, tarix, avto-rejim) Python da qoladi,
+  JS bilan QWebChannel orqali bog'lanadi.
+- Progress bar endi alohida **`progressbar.html`** faylida (iframe) —
+  yashil to'lqinli, Windows 7 uslubida; animatsiya faqat faol yuklashda
+  ishlaydi (idle'da CPU band bo'lmaydi).
+- «Xato bo'lsa qayta urinishlar» maydoni endi **dropdown** (1–10):
+  sichqoncha g'ildiragi qiymatni o'zgartirmaydi; ro'yxatda 4 ta raqam
+  ko'rinadi, qolganlari oddiy (uchburchaksiz) mayda scroll bilan;
+  tanlangan raqam orqa foni bilinar-bilinmas kulrang.
+- «?» yordam tugmalari maydoni biroz kengaytirildi — belgi kesilmaydi.
+- Loglar maydoni: burchakdagi «pencil»-tutqich xatosi olib tishlandi —
+  endi standart HTML resize tutqichi (tortib balandlikni o'zgartirish mumkin).
+- Buyruq matni bir xil monospace shrift (Consolas) — boshqa shriftga
+  o'tish xatosi tuzatildi.
+- Tugmalar qorong'u native uslubda; bosilmaydigan tugmalar o'chgandek
+  (so'nggila) ko'rinadi (masalan, «Yuklab olish» ishlayotganda
+  «Bekor qilish» o'chadi).
+- Tashqi (katta) scroll bar endi joy band qilmaydi — buyruq va loglardagidek.
+- Eskiq native widgetlar (`app/widgets/`, eski `main_window.py`) olib
+  tashlandi.
+- Ilova versiyasi 1.5.0 ga tayyorlandi (`version_info.txt`).
+
+### Build / release
+
+- Beta workflow endi **Continuous build** (rolling, `continuous` tag):
+  har ishga tushirilganda bitta release yangilanadi, versiya raqami
+  olinmaydi. Rasmiy imzoli release alohida (v1.5.0).
+- PyInstaller buildga QtWebEngine qo'shildi; `web/` papkasi
+  `dist/DownloadHelper/web` ga nusxalanadi.
+
 ### Qo'shildi
 
 - Buyruq yoniga **«Joylash»** tugmasi qo'shildi. U almashinuv buferidagi

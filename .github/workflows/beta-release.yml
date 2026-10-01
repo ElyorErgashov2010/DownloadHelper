@@ -1,49 +1,32 @@
-name: Build beta release (unsigned)
+name: Continuous build (imzosiz)
+
+# Imzosiz «davomiy build» (rolling): har ishga tushirilganda yangi EXE build
+# qilinadi va bitta o'zgarmas `continuous` tag li release yangilanadi.
+# Versiya raqami olinmaydi — rasmiy imzoli release alohida (v1.5.0 va h.k.).
 
 on:
   workflow_dispatch:
-    inputs:
-      release_tag:
-        description: "Beta tag (masalan: v1.4.1-beta.1)"
-        required: true
-        default: "v1.4.1-beta.1"
-        type: string
 
-run-name: Build unsigned beta ${{ inputs.release_tag }}
+run-name: Continuous build (imzosiz)
 
 permissions:
   contents: write
 
 concurrency:
-  group: beta-release-${{ inputs.release_tag }}
+  group: continuous-build
   cancel-in-progress: false
 
 jobs:
-  build-beta-release:
+  build-continuous:
     runs-on: windows-latest
     env:
       GITHUB_TOKEN: ${{ github.token }}
 
     steps:
-      - name: Checkout main branch
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Validate beta tag and application version
-        shell: pwsh
-        run: |
-          $tag = '${{ inputs.release_tag }}'
-          if ($tag -notmatch '^v(?<version>\d+\.\d+\.\d+)-beta\.\d+$') {
-            throw "Beta tag vX.Y.Z-beta.N ko'rinishida bo'lishi kerak. Qabul qilindi: $tag"
-          }
-          $version = $Matches['version']
-          $resourceText = Get-Content -Raw -Path 'version_info.txt'
-          foreach ($field in @('FileVersion', 'ProductVersion')) {
-            if (-not $resourceText.Contains("StringStruct(u'$field', u'$version')")) {
-              throw "version_info.txt $field maydonida $version bo'lishi kerak."
-            }
-          }
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -64,7 +47,16 @@ jobs:
         shell: pwsh
         run: |
           pyinstaller --noconfirm --clean --onedir --windowed `
-            --name "DownloadHelper" --version-file version_info.txt --noupx main.py
+            --name "DownloadHelper" --version-file version_info.txt --noupx main.py `
+            --collect-all PySide6.QtWebEngineCore `
+            --collect-all PySide6.QtWebEngineWidgets `
+            --collect-all PySide6.QtWebChannel
+
+      - name: Copy web UI assets
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force 'dist/DownloadHelper/web' | Out-Null
+          Copy-Item 'app/web/*' 'dist/DownloadHelper/web/' -Recurse -Force
 
       - name: Download N_m3u8DL-RE
         shell: pwsh
@@ -155,48 +147,54 @@ jobs:
           }
           Set-Content -Path 'SHA256SUMS.txt' -Value $hashes -Encoding ascii
 
-      - name: Keep beta artifact for 14 days
+      - name: Keep build artifact for 14 days
         uses: actions/upload-artifact@v7
         with:
-          name: DownloadHelper-${{ inputs.release_tag }}-unsigned
+          name: DownloadHelper-continuous-unsigned
           path: |
             DownloadHelper-win-x64.zip
             SHA256SUMS.txt
           if-no-files-found: error
           retention-days: 14
 
-      - name: Publish unsigned beta pre-release
+      - name: Publish/update "Continuous build" release
         uses: softprops/action-gh-release@v3
         with:
-          tag_name: ${{ inputs.release_tag }}
+          tag_name: continuous
           target_commitish: ${{ github.sha }}
-          name: DownloadHelper ${{ inputs.release_tag }} — Unsigned Beta
+          name: Continuous build — imzosiz
           prerelease: true
           make_latest: false
           fail_on_unmatched_files: true
+          overwrite: true
           files: |
             DownloadHelper-win-x64.zip
             SHA256SUMS.txt
           body: |
-            ## ⚠ Imzosiz beta test release
+            ## ⚠ Imzosiz davomiy build (rolling)
 
-            Bu release yangi funksiyalarni haqiqiy foydalanuvchilar bilan sinash uchun
-            chiqarilgan. `DownloadHelper.exe` hozircha ommaviy Windows code-signing
-            sertifikati bilan imzolanmagan.
+            Bu release har build qilinganda **yangilanadi** — eng so'nggi
+            test qilingan `DownloadHelper.exe` shu yerda turadi.
+            Bilgan sababli versiya raqami berilmagan; keyingi rasmiy
+            imzoli release alohida chiqadi (v1.5.0).
 
-            - Windows `Unknown publisher`, SmartScreen yoki Smart App Control ogohlantirishi
-              ko'rsatishi mumkin.
+            `DownloadHelper.exe` hozircha ommaviy Windows code-signing
+            sertifikati bilan imzolanmagan:
+
+            - Windows `Unknown publisher`, SmartScreen yoki Smart App Control
+              ogohlantirishi ko'rsatishi mumkin.
             - Faqat rasmiy GitHub Releases sahifasidan yuklang.
             - Xato yoki takliflarni [GitHub Issues](https://github.com/ElyorErgashov2010/DownloadHelper/issues)
               orqali yuboring.
             - Issue'ga parol, S3 kalit, token, private URL yoki decryption key yozmang.
 
-            ### Beta'da sinab ko'ring
+            ### So'nggi yangiliklar
 
-            - **Joylash** tugmasi va Avto-rejim
-            - Vositalar holati hamda Qayta tekshirish
-            - Formani tozalash va Papka ochish
-            - Kichik oyna scroll'i va log balandligini tortib o'zgartirish
+            - **HTML interfeys** — asosiy oyna HTML/CSS/JS da (QWebEngineView),
+              progress bar `progressbar.html` da
+            - Native Windows scroll barlar
+            - Qayta urinishlar dropdown (1–10)
+            - `onedir` build — tez ishga tushish, bitta jarayon
 
             ### Fayllar
 
@@ -208,6 +206,4 @@ jobs:
 
             ZIP dan Extract All qiling. `DownloadHelper` papkasi ichidagi
             `DownloadHelper.exe` ni oching — yordamchi vositalar (N_m3u8DL-RE,
-            ffmpeg, mp4decrypt) allaqachon shu papkada bor. Dastur endi
-            `onedir` rejimida build qilinadi: har ochilishda qayta dekompressiya
-            bo'lmaydi va Task Manager'da bitta jarayon ko'rinadi.
+            ffmpeg, mp4decrypt) va `web` papkasi allaqachon shu papkada bor.

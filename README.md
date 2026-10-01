@@ -17,9 +17,16 @@ Foydalanuvchi Telegram-botdan ishga tushirish buyrug'ini nusxalaydi, dasturga qo
 
 ## Interfeys
 
-DownloadHelper Windows'ning joriy light/dark dizayniga mos ishlaydi. Beta test
-davomida tekshirilgan haqiqiy Windows screenshotsi keyingi stable release bilan
-qo'shiladi.
+Asosiy oyna interfeysi **HTML/CSS/JS** da yozilgan (QWebEngineView orqali
+kiritilgan) — fayllar `app/web/` papkasida: `index.html`, `style.css`,
+`app.js` va progress bar uchun `progressbar.html`. Interfeys rang va
+tizimlarini **build qilmasdan** tekshirish/tahrirlash uchun
+`app/web/index.html` ni Chrome'da oching (Python yo'qligini xabar qiladi,
+lekin sahifa to'liq ko'rinadi).
+
+Mantiq (yuklab olish, navbat, S3, tarix, avto-rejim) Python da —
+`app/web_main_window.py` da — saqlanadi va JS bilan QWebChannel orqali
+bog'lanadi. Yordam va S3 sozlamalari dialoglari native (Qt) qolgan.
 
 ---
 
@@ -52,13 +59,13 @@ Arxiv ichida **`DownloadHelper`** papkasi bor:
 
 ### Kichik oynada ishlash
 
-- Oyna kichraytirilsa, **Yangi vazifa** varag'ining o'ng tomonida Windows'ning
-  standart vertikal scroll bar avtomatik paydo bo'ladi (Yordam
-  dialogidagidek).
-- Buyruq, Navbat va Loglar maydonlaridagi scroll lar ham standart
-  (Windows) scroll bar'idan foydalanadi.
+- Oyna kichraytirilsa, **Yangi vazifa** varag'ida ingichka vertikal scroll
+  faqat kerak bo'lganda paydo bo'ladi — joy oldindan band qilinmaydi
+  (Buyruq va Loglar maydonlaridagidek).
 - **Loglar** maydonining pastki o'ng burchagidagi diagonal belgi orqali log
   balandligini kattalashtirish yoki kichraytirish mumkin.
+- «Xato bo'lsa qayta urinishlar» dropdown ro'yxati ham kerak bo'lgandagina
+  mayda, uchburchaksiz scroll ko'rsatadi.
 
 ### Yordam tugmalari
 
@@ -108,7 +115,8 @@ Uchala utilita ham **dastur bilan bir papkada** (exe yonida) yoki **tizim PATH**
 ### Python bog'liqliklar
 
 ```
-PySide6-Essentials >= 6.5
+PySide6 >= 6.5
+PySide6-WebEngine >= 6.5
 boto3 >= 1.28
 text-unidecode >= 1.3
 ```
@@ -150,21 +158,29 @@ Xususiyatlari:
 
 ```bash
 pip install pyinstaller
-pyinstaller --onedir --windowed --name "DownloadHelper" --version-file version_info.txt --noupx main.py
+pyinstaller --onedir --windowed --name "DownloadHelper" --version-file version_info.txt --noupx main.py \
+  --collect-all PySide6.QtWebEngineCore \
+  --collect-all PySide6.QtWebEngineWidgets \
+  --collect-all PySide6.QtWebChannel
+# UI fayllarini ham dist papkasiga nusxalash:
+cp -r app/web dist/DownloadHelper/web
 ```
 
 Tayyor dastur `dist/DownloadHelper/` papkasida paydo bo'ladi. Papka ichiga
 `N_m3u8DL-RE.exe`, `ffmpeg.exe` va `mp4decrypt.exe` ni qo'ying.
+`--collect-all` belgilari HTML interfeys uchun kerakli QtWebEngine (Chromium)
+komponentlarini pakka kiritadi.
 
 > `--onedir` (papka) rejimi `--onefile` dan afzal: ishga tushishda paketni
 > vaqtincha papkaga dekompressiya qilish va Defender skanerlashi bo'lmaydi,
 > jarayon bitta bo'ladi.
 
-### UI preview (HTML)
+### HTML interfeys (dizayn tahrirlash)
 
-`preview/index.html` — asosiy oyna interfeysining statik HTML nusxasi.
-Ranglari `app/` kodidagi QSS qiymatlari bilan mos keltirilgan. Chrome'da
-ochib, rang va tizimlarni **build qilmasdan** tahrirlash mumkin.
+`app/web/style.css` faylining boshidagi `:root` blokida barcha ranglar
+(`--bg`, `--bg-btn`, `--border`, `--link` ...) turgan — ularni o'zgartirsangiz
+butun interfeys shu ranglarda o'zgaradi. `app/web/index.html` ni Chrome'da
+ochib, build qilmasdan ko'rishingiz mumkin.
 
 ---
 
@@ -226,12 +242,16 @@ botiga yuboring. Bot N_m3u8DL-RE uchun tayyor buyruqni qaytaradi.
   yashiradi; alohida elementlarni o'chirish yoki butun navbatni tozalash mumkin
 
 #### Xato bo'lsa qayta urinishlar
-- **«Xato bo'lsa qayta urinishlar»** maydoni (0–10, odatda 2) — yuklash xato
-  berganda avtomatik qayta urinishlar soni
+- **«Xato bo'lsa qayta urinishlar»** — 1 dan 10 gacha raqamlar dropdown'i
+  (odatda 2). Ro'yxatda 4 ta raqam ko'rinadi, qolganlari mayda uchburchaksiz
+  scroll bilan; tanlangan raqam orqa foni bilinar-bilinmas kulrang.
+  Sichqoncha g'ildiragi qiymatni o'zgartirmaydi
 
 #### Jarayon va loglar
-- Windows 7 Explorer uslubidagi progress-bar: bar markazida jonli o'tadigan
-  yashil to'lqin, uning ustida oq foiz yozuvi
+- Windows 7 Explorer uslubidagi progress-bar (`progressbar.html` da):
+  bar markazida jonli o'tadigan yashil to'lqin, uning ustida oq foiz yozuvi.
+  To'lqin harakati faqat faol yuklashda ishlaydi — to'xtab turganda
+  CPU band qilinmaydi
 - Bir nechta oqim (video, audio, subtitr) yuklanayotganda hozirgi faol oqimning
   jarayoni ko'rsatiladi
 - N_m3u8DL-RE chiqishi real vaqtda ko'rsatiladigan log paneli
@@ -328,15 +348,12 @@ Downloader/
 ├── version_info.txt               # Exe metama'lumotlari (PyInstaller uchun)
 ├── README.md
 ├── app/
-│   ├── main_window.py             # Asosiy oyna (varaqlar: Yangi vazifa / Tarix)
-│   ├── widgets/
-│   │   ├── command_input.py       # Buyruq kiritish maydoni + qo'yishda avto-tahlil
-│   │   ├── file_name_edit.py      # Nom muharriri + «Normallashtirish» tugmasi
-│   │   ├── destination_panel.py   # Lokal / S3 almashtirgich (profillar bilan)
-│   │   ├── progress_panel.py      # Progress-bar (Vid/Aud/Sub oqimlari bo'yicha)
-│   │   ├── task_list.py           # Vazifalar tarixi jadvali
-│   │   ├── log_panel.py           # Log paneli + kattalashtirish tutqichi
-│   │   └── slim_scrollbar.py       # Kichik oyna uchun ingichka scroll
+│   ├── web_main_window.py         # Asosiy oyna: HTML interfeys + Python mantiqi
+│   ├── web/
+│   │   ├── index.html             # Asosiy oyna UI (varaqlar: Yangi vazifa / Tarix)
+│   │   ├── style.css              # Ranglar va tizim (:root da)
+│   │   ├── app.js                 # UI logikasi + QWebChannel (Python bilan bog'in)
+│   │   └── progressbar.html       # To'lqinli progress bar (iframe)
 │   ├── dialogs/
 │   │   ├── s3_config_dialog.py    # S3 profil menejeri
 │   │   └── help_dialog.py         # Yordam / foydalanuvchi qo'llanmasi

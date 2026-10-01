@@ -88,7 +88,10 @@ jobs:
         shell: pwsh
         run: |
           pyinstaller --noconfirm --clean --onedir --windowed `
-            --name "DownloadHelper" --version-file version_info.txt --noupx main.py
+            --name "DownloadHelper" --version-file version_info.txt --noupx main.py `
+            --collect-all PySide6.QtWebEngineCore `
+            --collect-all PySide6.QtWebEngineWidgets `
+            --collect-all PySide6.QtWebChannel
 
       # SignPath accepts only an artifact uploaded by this GitHub-hosted build.
       # archive: false uploads the PE file directly, so its artifact configuration
@@ -137,6 +140,12 @@ jobs:
 
           Copy-Item -Path $signedExe.FullName -Destination 'dist/DownloadHelper/DownloadHelper.exe' -Force
           Write-Host "Valid SignPath signature: $($signature.SignerCertificate.Subject)"
+
+      - name: Copy web UI assets
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force 'dist/DownloadHelper/web' | Out-Null
+          Copy-Item 'app/web/*' 'dist/DownloadHelper/web/' -Recurse -Force
 
       - name: Download N_m3u8DL-RE
         shell: pwsh
