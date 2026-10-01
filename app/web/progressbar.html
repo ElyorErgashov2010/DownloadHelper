@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<!--
+  progressbar.html — Windows 7 uslubidagi progress bar (yashil fon + o'tayotgan oq tuman).
+
+  Asosiy oyna (index.html) uni iframe sifatida yuklaydi va postMessage bilan
+  boshqaradi:
+      { type: 'state', value: 0..100, finished: null|true|false }
+  Yuklash tugashi: finished=true  -> 100%, finished=false -> oxirgi foizda to'xtaydi.
+
+  Oq tumanning harakati faqat faol yuklash paytida (0 < foiz < 100) ishlaydi —
+  idle (0%) va yakunlangan holatlarda animatsiya to'xtatiladi (CPU band bo'lmaydi).
+
+  Oq tumanni sozlash (kengaytirish / rangni pasaytirish / tezlik):
+  pastdagi `.progress-bar-chunk::before` blokida izohlar bor.
+-->
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <title>Progress bar</title>
+    <style>
+        /* Sahifa foni — shaffof (ilova oyna rangi ko'rinadi) */
+        body {
+            background-color: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100%;
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+
+        /* Progress bar ramkasi */
+        .progress-container {
+            position: relative;
+            width: 100%;
+            height: 24px;
+            background-color: #1e1e1e;
+            border: 1px solid #3a3a3a;
+            border-radius: 4px;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        /* Niqob qatlami — JS value foizini shu yerda o'zgartiradi */
+        .progress-mask {
+            height: 100%;
+            width: 0%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+            border-radius: 3px;
+        }
+
+        /* Yashil fon */
+        .progress-bar-chunk {
+            width: 450px;
+            height: 100%;
+            position: relative;
+            background: linear-gradient(to bottom,
+                #59e87f 0%,
+                #3adb62 35%,
+                #1cb842 40%,
+                #139c34 100%
+            );
+        }
+
+        /* =========================================================================
+           O'TAYOTGAN OQ TUMAN PARAMETRLARI (KENGAYTIRISH VA RANGNI PASTLATISH)
+           ========================================================================= */
+        .progress-bar-chunk::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+
+            /* ---------------------------------------------------------------------
+               A) OQ RANGNI PASTLATISH VA KENGAYTIRISH SHU YERDA:
+               ---------------------------------------------------------------------
+               1. KENGAYTIRISH: Quyidagi 35%, 50%, 65% raqamlarining farqi qancha katta bo'lsa, oq bulut shuncha KENG bo'ladi.
+                  (Masalan: kengaytirish uchun 35% ni 25% qiling, 65% ni esa 75% qiling).
+               2. RANGNI PASTLATISH: O'rtadagi "0.51" ni xohishingizga ko'ra kamaytiring.
+                  (Masalan: xiraroq/pastroq rang qilish uchun uni 0.30 yoki 0.25 qiling).
+            --------------------------------------------------------------------- */
+            background: linear-gradient(to right,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0) 35%,       /* <--- Oq bulut boshlanishi (Kengaytirish uchun buni kamaytiring) */
+                rgba(255, 255, 255, 0.51) 50%,    /* <--- OQ RANGNI PASTLATISH: kichraytirsangiz rang pasayadi (Masalan: 0.25) */
+                rgba(255, 255, 255, 0) 65%,       /* <--- Oq bulut tugashi (Kengaytirish uchun buni kattartiring) */
+                rgba(255, 255, 255, 0) 100%
+            );
+
+            background-size: 200px 100%;
+            background-repeat: no-repeat;
+
+            /* ---------------------------------------------------------------------
+               B) OQ TUMAN TEZLIGI:
+               ---------------------------------------------------------------------
+               - Oq tuman TEZROQ o'tsin desangiz: 6.5s raqamini kichraytiring (Masalan: 3s yoki 2.5s qiling).
+               - SEKINROQ o'tsin desangiz: 6.5s ni kattartiring (Masalan: 9s yoki 10s qiling).
+            --------------------------------------------------------------------- */
+            animation: win7wave 6.5s linear infinite;
+        }
+
+        /* Faol emas (0% yoki yakunlangan) — animatsiya to'xtaydi, CPU band bo'lmaydi */
+        .progress-container.paused .progress-bar-chunk::before {
+            animation-play-state: paused;
+        }
+
+        /* Oq tumanning harakat yo'nalishi (to'liq kenglik bo'ylab) */
+        @keyframes win7wave {
+            0% {
+                background-position: -200px 0;
+            }
+            100% {
+                background-position: 100vw 0;
+            }
+        }
+
+        /* Foiz matni */
+        .progress-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: bold;
+            z-index: 2;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="progress-container paused" id="myContainer">
+        <div class="progress-mask" id="myMask">
+            <div class="progress-bar-chunk"></div>
+        </div>
+        <div class="progress-text" id="myText">0%</div>
+    </div>
+
+    <script>
+        "use strict";
+        const container = document.getElementById('myContainer');
+        const progressMask = document.getElementById('myMask');
+        const progressText = document.getElementById('myText');
+
+        let progressValue = 0;   // 0..100
+        let finished = null;     // null = davom etmoqda, true = muvaffaqiyat, false = xato
+
+        function render() {
+            const v = Math.max(0, Math.min(100, Math.round(progressValue)));
+            progressMask.style.width = v + '%';
+            progressText.innerText = v + '%';
+            // Tuman faqat faol yuklashda oqadi
+            const active = finished === null && progressValue > 0 && progressValue < 100;
+            container.classList.toggle('paused', !active);
+        }
+
+        // Asosiy oyna (app.js) dan holat keladi
+        window.addEventListener('message', function (e) {
+            const m = e.data || {};
+            if (m.type === 'state') {
+                progressValue = (typeof m.value === 'number') ? m.value : 0;
+                if (typeof m.finished === 'boolean') {
+                    finished = m.finished;
+                    if (m.finished) progressValue = 100;
+                }
+                render();
+            }
+        });
+
+        render();
+        // Tayyorligini asosiy oynaga xabar qila — undan keyin holat yuboriladi
+        window.parent.postMessage({ type: 'ready' }, '*');
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yuklab olish yordamchisi</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- Yuqori qator: avto-rejim, normallashtirish, yordam -->
+  <div class="topbar">
+    <label class="chk"><input type="checkbox" id="autoCb"> <span>Avto-rejim</span></label>
+    <label class="chk"><input type="checkbox" id="autoNormCb" disabled> <span>Nomni avto-normallashtirish</span></label>
+    <button class="qbtn small" id="autoHelpBtn" title="Avto-rejim yordami" type="button">?</button>
+    <div class="spacer"></div>
+    <button class="qbtn" id="helpBtn" title="Yordam (F1)" type="button">?</button>
+  </div>
+
+  <!-- Varaq (tab) tanlash -->
+  <div class="tabs" role="tablist">
+    <button class="tab active" data-tab="0" type="button">Yangi vazifa</button>
+    <button class="tab" data-tab="1" type="button">Tarix</button>
+  </div>
+
+  <!-- ═══ Yangi vazifa varag'i ═══ -->
+  <section class="tabpage active" id="tab-new">
+
+    <div class="hint">
+      Ishga tushirish buyrug'ini olish uchun System Log (JSON) faylini
+      Telegramdagi <a href="#" data-ext="https://t.me/kinescopedownloader_robot">@kinescopedownloader_robot</a>
+      botiga yuboring
+    </div>
+
+    <label class="lbl">Buyruq:</label>
+    <textarea id="cmd" placeholder="N_m3u8DL-RE buyrug'ini shu yerga qo'ying..." spellcheck="false"></textarea>
+    <div class="row">
+      <button class="btn" id="parseBtn" type="button">Buyruqni tahlil qilish</button>
+      <button class="btn" id="pasteBtn" type="button" title="Almashinuv buferidagi matnni joylash (Ctrl+V)">Joylash</button>
+    </div>
+
+    <div class="row tools">
+      <span class="frame-label">Vositalar holati:</span>
+      <span class="frame-label tools-status" id="toolsStatus"></span>
+      <button class="btn" id="toolsRefreshBtn" type="button" title="Yordamchi vositalar holatini qayta tekshirish">Qayta tekshirish</button>
+    </div>
+
+    <div class="row">
+      <label class="lbl inline">Fayl nomi:</label>
+      <input type="text" id="fileName" placeholder="Fayl nomi (kengaytmasiz)">
+      <button class="btn" id="normalizeBtn" type="button">Normallashtirish</button>
+    </div>
+
+    <label class="lbl">Saqlash joyi:</label>
+    <div class="row">
+      <label class="radio"><input type="radio" name="dest" value="local" checked> <span>Lokal</span></label>
+      <input type="text" id="localPath" placeholder="/papka/yo'li">
+      <button class="btn" id="browseBtn" type="button">Tanlash...</button>
+    </div>
+    <div class="row">
+      <label class="radio"><input type="radio" name="dest" value="s3"> <span>S3</span></label>
+      <select id="s3Profile" disabled></select>
+      <input type="text" id="s3Path" placeholder="/baketdagi/yo'l" disabled>
+      <button class="btn" id="s3SettingsBtn" type="button" disabled>Sozlamalar</button>
+    </div>
+    <label class="chk s3del"><input type="checkbox" id="deleteLocalCb" checked disabled> <span>S3 ga yuklangandan so'ng lokal nusxani o'chirish</span></label>
+
+    <div class="row">
+      <label class="lbl inline">Xato bo'lsa qayta urinishlar:</label>
+      <div class="dropdown" id="retryDd">
+        <button class="dd-btn" id="retryBtn" type="button" title="Yuklashda xato bo'lsa qayta urinishlar soni">
+          <span class="dd-val" id="retryVal">2</span><span class="chev"></span>
+        </button>
+        <div class="dd-list" id="retryList"></div>
+      </div>
+      <div class="gap"></div>
+      <button class="btn" id="addQueueBtn" type="button">Navbatga qo'shish</button>
+      <button class="btn" id="downloadBtn" type="button">Yuklab olish</button>
+      <button class="btn" id="stopBtn" type="button" disabled>Bekor qilish</button>
+    </div>
+
+    <div class="row">
+      <button class="btn" id="clearFormBtn" type="button" title="Buyruq, nom, progress va loglarni tozalash">Formani tozalash</button>
+      <button class="btn" id="openFolderBtn" type="button" disabled title="Oxirgi muvaffaqiyatli yuklash papkasini ochish">Papka ochish</button>
+    </div>
+
+    <!-- Navbat -->
+    <div class="row queue-head">
+      <button class="btn queue-toggle" id="queueToggle" type="button" title="Navbatni ko'rsatish yoki yashirish">&#9654; Navbat (0) &#8212; Ko'rsatish</button>
+      <div class="spacer"></div>
+      <button class="btn" id="queueRemoveBtn" type="button" hidden>Tanlanganni o'chirish</button>
+      <button class="btn" id="queueClearBtn" type="button" hidden>Tozalash</button>
+    </div>
+    <ul class="listbox" id="queueList" hidden></ul>
+
+    <!-- S3 xatolari -->
+    <div class="row s3fail-head">
+      <button class="s3-toggle" id="s3Toggle" type="button" hidden>&#9654; S3 xatolari (0)</button>
+      <div class="spacer"></div>
+      <button class="btn small" id="s3RetryAllBtn" type="button" hidden>Barchasini qayta urinish</button>
+      <button class="btn small" id="s3RetrySelBtn" type="button" hidden>Tanlanganlarni qayta urinish</button>
+      <button class="btn small" id="s3ClearBtn" type="button" hidden>Tozalash</button>
+    </div>
+    <ul class="listbox s3fail-list" id="s3FailList" hidden></ul>
+
+    <!-- Progress bar (progressbar.html) -->
+    <iframe id="progressFrame" src="progressbar.html" title="Jarayon"></iframe>
+    <div class="row progress-info">
+      <span id="progressStatus"></span>
+      <span class="dim" id="progressInfo"></span>
+    </div>
+
+    <!-- Loglar -->
+    <div class="row log-head">
+      <label class="lbl">Loglar:</label>
+      <div class="spacer"></div>
+      <button class="btn" id="logCopyBtn" type="button" title="Logni almashinuv buferiga nusxalash">Nusxalash</button>
+      <button class="btn" id="logSaveBtn" type="button" title="Logni faylga saqlash">Saqlash</button>
+    </div>
+    <div class="logbox" id="logBox" tabindex="0"></div>
+  </section>
+
+  <!-- ═══ Tarix varag'i ═══ -->
+  <section class="tabpage" id="tab-history">
+    <div class="tablewrap">
+      <table class="tasktable">
+        <thead>
+          <tr><th class="c-name">Nomi</th><th>Holat</th><th>Sana</th><th>Manzil</th></tr>
+        </thead>
+        <tbody id="taskRows"></tbody>
+      </table>
+    </div>
+    <div class="row">
+      <button class="btn" id="viewLogsBtn" type="button">Loglarni ko'rsatish</button>
+      <button class="btn" id="redownloadBtn" type="button">Qayta yuklab olish</button>
+      <button class="btn" id="deleteTaskBtn" type="button">O'chirish</button>
+    </div>
+    <div class="row log-head">
+      <label class="lbl">Vazifa loglari:</label>
+      <div class="spacer"></div>
+      <button class="btn" id="histLogCopyBtn" type="button" title="Logni almashinuv buferiga nusxalash">Nusxalash</button>
+      <button class="btn" id="histLogSaveBtn" type="button" title="Logni faylga saqlash">Saqlash</button>
+    </div>
+    <div class="logbox" id="histLogBox" tabindex="0"></div>
+  </section>
+
+  <div class="footer">
+    <a href="#" data-ext="https://github.com/ElyorErgashov2010/DownloadHelper/releases">github.com/ElyorErgashov2010/DownloadHelper/releases</a>
+  </div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
