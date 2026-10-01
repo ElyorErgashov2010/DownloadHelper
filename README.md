@@ -115,11 +115,13 @@ Uchala utilita ham **dastur bilan bir papkada** (exe yonida) yoki **tizim PATH**
 ### Python bog'liqliklar
 
 ```
-PySide6 >= 6.5
-PySide6-WebEngine >= 6.5
+PySide6 >= 6.5        # (Essentials + Addons: ichida QtWebEngine bor)
 boto3 >= 1.28
 text-unidecode >= 1.3
 ```
+
+> Eslatma: HTML interfeys uchun kerakli **QtWebEngine** `PySide6` paketi
+> ichidagi `PySide6-Addons` tarkibida keladi (alo hida pip paketi yo'q).
 
 O'rnatish:
 
