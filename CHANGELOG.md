@@ -12,8 +12,8 @@ saqlanadi.
   Mantiq (yuklab olish, navbat, S3, tarix, avto-rejim) Python da qoladi,
   JS bilan QWebChannel orqali bog'lanadi.
 - Progress bar endi alohida **`progressbar.html`** faylida (iframe) —
-  yashil to'lqinli, Windows 7 uslubida; animatsiya faqat faol yuklashda
-  ishlaydi (idle'da CPU band bo'lmaydi).
+  yashil fon + o'tayotgan oq tuman (Windows 7 uslubida); animatsiya
+  faqat faol yuklashda ishlaydi (idle'da CPU band bo'lmaydi).
 - «Xato bo'lsa qayta urinishlar» maydoni endi **dropdown** (1–10):
   sichqoncha g'ildiragi qiymatni o'zgartirmaydi; ro'yxatda 4 ta raqam
   ko'rinadi, qolganlari oddiy (uchburchaksiz) mayda scroll bilan;

@@ -360,7 +360,7 @@ select#s3Profile {
 
 iframe#progressFrame {
   width: 100%;
-  height: 38px;
+  height: 32px;
   border: none;
   display: block;
   background: transparent;

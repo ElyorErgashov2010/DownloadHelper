@@ -1,156 +1,187 @@
-<!doctype html>
+<!DOCTYPE html>
 <!--
-  progressbar.html — jonli «yashil to'lqin»li progress bar (Windows 7 uslubida).
-  Asosiy oyna (index.html) uni iframe sifatida yuklaydi va postMessage bilan
-  boshqaradi:  { type: 'state', value: 0..100, finished: null|true|false }
+  progressbar.html — Windows 7 uslubidagi progress bar (yashil fon + o'tayotgan oq tuman).
 
-  Animatsiya faqat faol yuklash paytida (0 < foiz < 100) ishlaydi —
-  idle (0%) va yakunlangan holatlarda CPU band qilinmaydi.
+  Asosiy oyna (index.html) uni iframe sifatida yuklaydi va postMessage bilan
+  boshqaradi:
+      { type: 'state', value: 0..100, finished: null|true|false }
+  Yuklash tugashi: finished=true  -> 100%, finished=false -> oxirgi foizda to'xtaydi.
+
+  Oq tumanning harakati faqat faol yuklash paytida (0 < foiz < 100) ishlaydi —
+  idle (0%) va yakunlangan holatlarda animatsiya to'xtatiladi (CPU band bo'lmaydi).
+
+  Oq tumanni sozlash (kengaytirish / rangni pasaytirish / tezlik):
+  pastdagi `.progress-bar-chunk::before` blokida izohlar bor.
 -->
 <html lang="uz">
 <head>
-<meta charset="utf-8">
-<style>
-  html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: transparent; overflow: hidden; }
-  canvas { display: block; width: 100%; height: 100%; }
-</style>
+    <meta charset="UTF-8">
+    <title>Progress bar</title>
+    <style>
+        /* Sahifa foni — shaffof (ilova oyna rangi ko'rinadi) */
+        body {
+            background-color: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100%;
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+
+        /* Progress bar ramkasi */
+        .progress-container {
+            position: relative;
+            width: 100%;
+            height: 24px;
+            background-color: #1e1e1e;
+            border: 1px solid #3a3a3a;
+            border-radius: 4px;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        /* Niqob qatlami — JS value foizini shu yerda o'zgartiradi */
+        .progress-mask {
+            height: 100%;
+            width: 0%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+            border-radius: 3px;
+        }
+
+        /* Yashil fon */
+        .progress-bar-chunk {
+            width: 450px;
+            height: 100%;
+            position: relative;
+            background: linear-gradient(to bottom,
+                #59e87f 0%,
+                #3adb62 35%,
+                #1cb842 40%,
+                #139c34 100%
+            );
+        }
+
+        /* =========================================================================
+           O'TAYOTGAN OQ TUMAN PARAMETRLARI (KENGAYTIRISH VA RANGNI PASTLATISH)
+           ========================================================================= */
+        .progress-bar-chunk::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+
+            /* ---------------------------------------------------------------------
+               A) OQ RANGNI PASTLATISH VA KENGAYTIRISH SHU YERDA:
+               ---------------------------------------------------------------------
+               1. KENGAYTIRISH: Quyidagi 35%, 50%, 65% raqamlarining farqi qancha katta bo'lsa, oq bulut shuncha KENG bo'ladi.
+                  (Masalan: kengaytirish uchun 35% ni 25% qiling, 65% ni esa 75% qiling).
+               2. RANGNI PASTLATISH: O'rtadagi "0.51" ni xohishingizga ko'ra kamaytiring.
+                  (Masalan: xiraroq/pastroq rang qilish uchun uni 0.30 yoki 0.25 qiling).
+            --------------------------------------------------------------------- */
+            background: linear-gradient(to right,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0) 35%,       /* <--- Oq bulut boshlanishi (Kengaytirish uchun buni kamaytiring) */
+                rgba(255, 255, 255, 0.51) 50%,    /* <--- OQ RANGNI PASTLATISH: kichraytirsangiz rang pasayadi (Masalan: 0.25) */
+                rgba(255, 255, 255, 0) 65%,       /* <--- Oq bulut tugashi (Kengaytirish uchun buni kattartiring) */
+                rgba(255, 255, 255, 0) 100%
+            );
+
+            background-size: 200px 100%;
+            background-repeat: no-repeat;
+
+            /* ---------------------------------------------------------------------
+               B) OQ TUMAN TEZLIGI:
+               ---------------------------------------------------------------------
+               - Oq tuman TEZROQ o'tsin desangiz: 6.5s raqamini kichraytiring (Masalan: 3s yoki 2.5s qiling).
+               - SEKINROQ o'tsin desangiz: 6.5s ni kattartiring (Masalan: 9s yoki 10s qiling).
+            --------------------------------------------------------------------- */
+            animation: win7wave 6.5s linear infinite;
+        }
+
+        /* Faol emas (0% yoki yakunlangan) — animatsiya to'xtaydi, CPU band bo'lmaydi */
+        .progress-container.paused .progress-bar-chunk::before {
+            animation-play-state: paused;
+        }
+
+        /* Oq tumanning harakat yo'nalishi (to'liq kenglik bo'ylab) */
+        @keyframes win7wave {
+            0% {
+                background-position: -200px 0;
+            }
+            100% {
+                background-position: 100vw 0;
+            }
+        }
+
+        /* Foiz matni */
+        .progress-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: bold;
+            z-index: 2;
+            pointer-events: none;
+        }
+    </style>
 </head>
 <body>
-<canvas id="c"></canvas>
-<script>
-"use strict";
-(function () {
-  const canvas = document.getElementById("c");
-  const ctx = canvas.getContext("2d");
 
-  const AMP = 5;    // to'lqin balandligi (px)
-  const LEN = 34;   // bitta to'lqin davri (px)
+    <div class="progress-container paused" id="myContainer">
+        <div class="progress-mask" id="myMask">
+            <div class="progress-bar-chunk"></div>
+        </div>
+        <div class="progress-text" id="myText">0%</div>
+    </div>
 
-  let value = 0;       // 0..100
-  let finished = null; // null = davom etmoqda, true = muvaffaqiyat, false = xato
-  let waveShift = 0;
-  let tick = 0;
-  let rafId = null;
+    <script>
+        "use strict";
+        const container = document.getElementById('myContainer');
+        const progressMask = document.getElementById('myMask');
+        const progressText = document.getElementById('myText');
 
-  function roundRect(x, y, w, h, r) {
-    r = Math.min(r, w / 2, h / 2);
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.arcTo(x + w, y, x + w, y + h, r);
-    ctx.arcTo(x + w, y + h, x, y + h, r);
-    ctx.arcTo(x, y + h, x, y, r);
-    ctx.arcTo(x, y, x + w, y, r);
-    ctx.closePath();
-  }
+        let progressValue = 0;   // 0..100
+        let finished = null;     // null = davom etmoqda, true = muvaffaqiyat, false = xato
 
-  function draw() {
-    const rect = canvas.getBoundingClientRect();
-    const W = rect.width, H = rect.height;
-    ctx.clearRect(0, 0, W, H);
-    if (W < 4 || H < 4) return;
+        function render() {
+            const v = Math.max(0, Math.min(100, Math.round(progressValue)));
+            progressMask.style.width = v + '%';
+            progressText.innerText = v + '%';
+            // Tuman faqat faol yuklashda oqadi
+            const active = finished === null && progressValue > 0 && progressValue < 100;
+            container.classList.toggle('paused', !active);
+        }
 
-    const bar = { x: 1, y: 1, w: W - 2, h: H - 2 };
-    const rad = bar.h / 2;
+        // Asosiy oyna (app.js) dan holat keladi
+        window.addEventListener('message', function (e) {
+            const m = e.data || {};
+            if (m.type === 'state') {
+                progressValue = (typeof m.value === 'number') ? m.value : 0;
+                if (typeof m.finished === 'boolean') {
+                    finished = m.finished;
+                    if (m.finished) progressValue = 100;
+                }
+                render();
+            }
+        });
 
-    // Groove (pastki yo'l) — och kulrang gradient
-    const g = ctx.createLinearGradient(0, bar.y, 0, bar.y + bar.h);
-    g.addColorStop(0.0, "#c8c8c8");
-    g.addColorStop(0.5, "#f1f1f1");
-    g.addColorStop(1.0, "#d2d2d2");
-    roundRect(bar.x, bar.y, bar.w, bar.h, rad);
-    ctx.fillStyle = g;
-    ctx.fill();
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = "#8c8c8c";
-    ctx.stroke();
+        render();
+        // Tayyorligini asosiy oynaga xabar qila — undan keyin holat yuboriladi
+        window.parent.postMessage({ type: 'ready' }, '*');
+    </script>
 
-    // Yashil to'lqinli to'ldirish
-    const v = Math.max(0, Math.min(100, value));
-    const fw = bar.w * v / 100;
-    if (fw >= 1) {
-      ctx.save();
-      roundRect(bar.x, bar.y, bar.w, bar.h, rad);
-      ctx.clip();
-      const fg = ctx.createLinearGradient(0, bar.y, 0, bar.y + bar.h);
-      fg.addColorStop(0.0, "#7adf52");
-      fg.addColorStop(0.5, "#5ec93f");
-      fg.addColorStop(1.0, "#40a826");
-      ctx.fillStyle = fg;
-      ctx.fillRect(bar.x, bar.y, fw, bar.h);
-
-      // To'lqin chizig'i
-      ctx.strokeStyle = "#c4f1ad";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      for (let x = 0; x <= fw; x += 1) {
-        const px = bar.x + x;
-        const py = bar.y + bar.h / 2 + AMP * Math.sin(((x - waveShift) / LEN) * Math.PI * 2);
-        if (x === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
-      }
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    // Foiz — markazda, oq
-    ctx.fillStyle = "#ffffff";
-    ctx.font = '600 13px "Segoe UI", sans-serif';
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.shadowColor = "rgba(0,0,0,0.45)";
-    ctx.shadowBlur = 3;
-    ctx.fillText(Math.round(v) + "%", W / 2, H / 2);
-    ctx.shadowBlur = 0;
-  }
-
-  // Windows 7 dagiga o'xshash nozik pulsatsiya
-  function step() {
-    tick += 0.03;
-    const speed = 1.7 + 0.7 * Math.sin(tick * 1.6);
-    waveShift = (waveShift + speed) % LEN;
-    draw();
-    rafId = requestAnimationFrame(step);
-  }
-
-  function syncAnim() {
-    const active = finished === null && value > 0 && value < 100;
-    if (active && !rafId) {
-      rafId = requestAnimationFrame(step);
-    } else if (!active && rafId) {
-      cancelAnimationFrame(rafId);
-      rafId = null;
-      waveShift = 0;
-      tick = 0;
-      draw();
-    }
-  }
-
-  window.addEventListener("message", function (e) {
-    const m = e.data || {};
-    if (m.type === "state") {
-      value = (typeof m.value === "number") ? m.value : 0;
-      if (typeof m.finished === "boolean") {
-        finished = m.finished;
-        if (m.finished) value = 100;
-      }
-      syncAnim();
-      draw();
-    }
-  });
-
-  function resize() {
-    const dpr = window.devicePixelRatio || 1;
-    const r = canvas.getBoundingClientRect();
-    canvas.width = Math.max(1, Math.round(r.width * dpr));
-    canvas.height = Math.max(1, Math.round(r.height * dpr));
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    draw();
-  }
-  window.addEventListener("resize", resize);
-
-  resize();
-  // Tayyorligini asosiy oynaga xabar qila — undan keyin holat yuboriladi
-  window.parent.postMessage({ type: "ready" }, "*");
-})();
-</script>
 </body>
 </html>
