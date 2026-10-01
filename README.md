@@ -52,14 +52,11 @@ Arxiv ichida **`DownloadHelper`** papkasi bor:
 
 ### Kichik oynada ishlash
 
-- Oyna kichraytirilsa, **Yangi vazifa** varag'ining o'ng tomonida Windows
-  Explorer uslubidagi ingichka, ramkasiz vertikal scroll paydo bo'ladi.
-- Sichqoncha scroll ustiga bormaganda tutqich ingichka bo'lib turadi; borganda
-  kengayadi, nozik fon yo'li ko'rinadi va yuqori/pastki **▲▼** tugmalar chiqadi.
-  Sichqoncha olinganda yana ixcham holatga qaytadi.
-- **▲▼** tugmalari (va yo'l) ustida bosib turilganda scroll to'xtovsiz davom
-  etadi, qo'yib yuborilganda to'xtaydi.
-- Buyruq, Navbat va Loglar ichidagi scrolllar ham shu Explorer uslubida ishlaydi.
+- Oyna kichraytirilsa, **Yangi vazifa** varag'ining o'ng tomonida Windows'ning
+  standart vertikal scroll bar avtomatik paydo bo'ladi (Yordam
+  dialogidagidek).
+- Buyruq, Navbat va Loglar maydonlaridagi scroll lar ham standart
+  (Windows) scroll bar'idan foydalanadi.
 - **Loglar** maydonining pastki o'ng burchagidagi diagonal belgi orqali log
   balandligini kattalashtirish yoki kichraytirish mumkin.
 
@@ -162,6 +159,12 @@ Tayyor dastur `dist/DownloadHelper/` papkasida paydo bo'ladi. Papka ichiga
 > `--onedir` (papka) rejimi `--onefile` dan afzal: ishga tushishda paketni
 > vaqtincha papkaga dekompressiya qilish va Defender skanerlashi bo'lmaydi,
 > jarayon bitta bo'ladi.
+
+### UI preview (HTML)
+
+`preview/index.html` — asosiy oyna interfeysining statik HTML nusxasi.
+Ranglari `app/` kodidagi QSS qiymatlari bilan mos keltirilgan. Chrome'da
+ochib, rang va tizimlarni **build qilmasdan** tahrirlash mumkin.
 
 ---
 

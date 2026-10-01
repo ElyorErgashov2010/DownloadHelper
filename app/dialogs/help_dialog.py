@@ -133,16 +133,12 @@ Joy yetarli bo'lmasa, vazifa o'tkazib yuboriladi.</p>
 <h3>Kichik oynada ishlash</h3>
 
 <p>Oyna kichraytirilsa, <b>«Yangi vazifa»</b> varag'ining o'ng tomonida
-Windows Explorer uslubidagi ingichka, ramkasiz vertikal scroll paydo bo'ladi.
-Sichqoncha bormaganda tutqich ingichka; borganda kengayadi, nozik fon yo'li va
-yuqori/pastki <b>▲▼</b> tugmalar ko'rinadi. Sichqoncha olinganda yana ixcham
-holatga qaytadi.</p>
+Windows'ning standart vertikal scroll bar avtomatik paydo bo'ladi
+(bu oynadagidek). Sizqoncha scroll ustiga bormaganda u ingichka
+bo'lib turadi, borganda kengayadi — bu Windows'ning o'z xulqidir.</p>
 
-<p><b>▲▼</b> tugmalari (va tutqich orasidagi yo'l) ustida bosib turilganda
-scroll to'xtovsiz davom etadi, qo'yib yuborilganda to'xtaydi.</p>
-
-<p>Buyruq, Navbat va Loglar ichidagi scrolllar ham shu Explorer uslubida
-ishlaydi: oddiy holatda ixcham, hover'da kengroq ko'rinadi.</p>
+<p>Buyruq, Navbat va Loglar maydonlaridagi scroll lar ham Windows'ning
+standart scroll bar'idan foydalanadi — shu Yordam oynasidagidek.</p>
 
 <p><b>Jarayon:</b> yuklash paytida Windows 7 Explorer uslubidagi progress bar
 markazida jonli yashil to'lqin o'tadi va foiz yozuvi uning ustidan chiqib

@@ -41,6 +41,17 @@ saqlanadi.
 
 ### Tuzatildi
 
+- Scroll barlar yana bir bor qayta ko'rib chiqildi: endi barcha maydonlar
+  (Buyruq, Navbat, Loglar, asosiy oyna) **Windows'ning standart scroll
+  bar'idan** foydalanadi — Yordam dialogidagidek. Maxsus
+  `slim_scrollbar.py` moduli olib tashlandi.
+
+### Qo'shildi
+
+- `preview/index.html` — asosiy oyna interfeysining statik HTML nusxasi
+  (ranglari `app/` kodidagilari bilan mos). Chrome'da ochib, rang va
+  tizimlarni build qilmasdan tahrirlash mumkin.
+
 - **Ilova idle holatda CPU band qilib qo'yayotgan edi**: to'lqinli progress
   bar'dagi animatsiya taymeri widget yaratilishi bilan boshlanib, hech qachon
   to'xtamaydi edi («0%» holatida ham har 30 ms da qayta chizilardi). Endi

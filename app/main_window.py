@@ -25,7 +25,6 @@ from app.widgets.file_name_edit import FileNameEdit
 from app.widgets.destination_panel import DestinationPanel
 from app.widgets.log_panel import LogPanel
 from app.widgets.progress_panel import ProgressPanel
-from app.widgets.slim_scrollbar import SlimVerticalScrollBar
 from app.widgets.spinbox import ArrowSpinBox
 from app.widgets.task_list import TaskList
 from app.dialogs.s3_config_dialog import S3ConfigDialog
@@ -157,14 +156,14 @@ class MainWindow(QMainWindow):
     # ── «Yangi vazifa» varag'i ───────────────────────────────────
 
     def _build_new_task_tab(self):
-        # Kichik oynada formani siqib yubormaslik uchun faqat shu varaq scroll qilinadi.
+        # Kichik oynada formani siqib yubormaslik uchun faqat shu varaq scroll qilinadi
+        # (Windows'ning standart scroll bar'idan foydalaniladi — Yordam
+        # dialogidagidek).
         tab = QScrollArea()
         tab.setWidgetResizable(True)
         tab.setFrameShape(QFrame.Shape.NoFrame)
         tab.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         tab.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
-        self._new_task_scrollbar = SlimVerticalScrollBar(tab)
-        tab.setVerticalScrollBar(self._new_task_scrollbar)
 
         task_content = QWidget()
         task_content.setMinimumWidth(660)
@@ -279,9 +278,6 @@ class MainWindow(QMainWindow):
 
         self._queue_list = QListWidget()
         self._queue_list.setMaximumHeight(120)
-        self._queue_list.setVerticalScrollBar(
-            SlimVerticalScrollBar(framed_on_hover=True, extent=18)
-        )
         self._queue_list.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self._queue_list.setVisible(False)
         self._queue_list.setSelectionMode(QListWidget.SelectionMode.ExtendedSelection)
@@ -319,9 +315,6 @@ class MainWindow(QMainWindow):
 
         self._s3_fail_list = QListWidget()
         self._s3_fail_list.setMaximumHeight(120)
-        self._s3_fail_list.setVerticalScrollBar(
-            SlimVerticalScrollBar(framed_on_hover=True, extent=18)
-        )
         self._s3_fail_list.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self._s3_fail_list.setVisible(False)
         self._s3_fail_list.setSelectionMode(QListWidget.SelectionMode.ExtendedSelection)
